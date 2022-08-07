@@ -1,0 +1,192 @@
+use crate::structure::Difficulty;
+use crate::structure::ModelRef;
+use crate::structure::Problem;
+use crate::structure::Settings;
+use std::cell::Cell;
+use std::cell::RefCell;
+use std::rc::Rc;
+use tui::style::Style;
+use tui::text::Span;
+use tui::text::Spans;
+use tui::widgets::Paragraph;
+use tui::widgets::Wrap;
+
+struct ProblemCacher {
+    range: Cell<(usize, usize)>,
+    problems: RefCell<Vec<Rc<Problem>>>,
+}
+
+impl Default for ProblemCacher {
+    fn default() -> Self {
+        Self {
+            range: Cell::new((0, 0)),
+            problems: RefCell::new(Vec::new()),
+        }
+    }
+}
+
+impl ProblemCacher {
+    pub fn remember(&self, input: (usize, usize), result: &Vec<Rc<Problem>>) {
+        self.range.set(input);
+        let mut x = self.problems.borrow_mut();
+        *x = result.clone();
+    }
+
+    pub fn get_cached(&self, input: (usize, usize)) -> Option<Vec<Rc<Problem>>> {
+        if input == self.range.get() {
+            return Some(self.problems.borrow().clone());
+        }
+        None
+    }
+}
+
+pub struct View {
+    model: ModelRef,
+    settings: Settings,
+    last_prob_batch: ProblemCacher,
+}
+
+impl From<&ModelRef> for View {
+    fn from(model: &ModelRef) -> Self {
+        Self {
+            model: Rc::clone(model),
+            settings: model.settings.borrow().clone(),
+            last_prob_batch: ProblemCacher::default(),
+        }
+    }
+}
+
+impl View {
+    fn calculate_curr_problem_range(curr_prob_id: usize, row_n: usize) -> (usize, usize) {
+        let mut end = row_n; // Index of last row to be shown
+        while curr_prob_id >= end {
+            end += row_n;
+        }
+
+        (end - row_n, end)
+    }
+
+    pub fn get_problems_to_select<'a>(&self, row_n: usize) -> Vec<Paragraph<'a>> {
+        let current_prob_id = self.model.curr_prob_id.get();
+        let range = Self::calculate_curr_problem_range(current_prob_id, row_n);
+
+        let relevant_problems = self
+            .last_prob_batch
+            .get_cached(range)
+            .unwrap_or({
+                let r = self.model.get_problems_in_range(range.0, range.1);
+                self.last_prob_batch.remember(range, &r);
+                r
+            });
+
+        relevant_problems
+            .into_iter()
+            .enumerate()
+            .map(|(relative_index, prob): (usize, Rc<Problem>)| {
+                let true_index = relative_index + range.0;
+                self.problem_as_row(prob.clone(), true_index, true_index == current_prob_id)
+            })
+            .collect()
+    }
+
+    pub fn problem_as_row<'a>(
+        &self,
+        prob: Rc<Problem>,
+        id: usize,
+        is_selected: bool,
+    ) -> Paragraph<'a> {
+        let prob = prob.clone();
+        let spans = vec![
+            Self::marker(is_selected, self.settings.pretty),
+            Self::num(id),
+            Self::bold(prob.problem_name.clone()),
+            Self::separator(),
+            Self::difficulty(prob.difficulty.clone()),
+            Self::separator(),
+            Self::begin_tags(),
+            Self::tags(&prob.tags),
+        ];
+        let par = Spans::from(spans);
+        Paragraph::new(par).wrap(Wrap { trim: false })
+    }
+
+    fn num(id: usize) -> Span<'static> {
+        Span::styled(
+            format!("{id}. "),
+            Style::default().fg(tui::style::Color::Cyan),
+        )
+    }
+
+    fn begin_tags() -> Span<'static> {
+        Span::from("tags: ")
+    }
+
+    fn tags<'a>(tags: &Vec<String>) -> Span<'a> {
+        let phrases = tags.join(", ");
+        Span::styled(
+            phrases,
+            tui::style::Style::default().add_modifier(tui::style::Modifier::ITALIC),
+        )
+    }
+
+    fn difficulty<'a>(diff: Difficulty) -> Span<'a> {
+        match diff {
+            Difficulty::Easy => {
+                Span::styled("Easy  ", Style::default().fg(tui::style::Color::Green))
+            }
+            Difficulty::Medium => Span::styled(
+                "Medium",
+                Style::default().fg(tui::style::Color::LightYellow),
+            ),
+            Difficulty::Hard => Span::styled("Hard  ", Style::default().fg(tui::style::Color::Red)),
+        }
+    }
+
+    fn separator() -> Span<'static> {
+        Span::from("   /     ")
+    }
+
+    fn bold<'a>(text: String) -> Span<'a> {
+        Span::styled(
+            text,
+            tui::style::Style::default().add_modifier(tui::style::Modifier::BOLD),
+        )
+    }
+
+    fn marker<'a>(is_selected: bool, is_pretty: bool) -> Span<'a> {
+        if is_selected {
+            let arrow = if is_pretty { " 🡆   " } else { "-->" };
+            return Span::styled(arrow, Style::default().fg(tui::style::Color::Cyan));
+        }
+
+        Span::from("")
+    }
+
+    pub fn curr_menu(&self) -> Menu {
+        self.model.menu.borrow().clone()
+    }
+
+    fn text<'a>(t: String) -> Span<'a> {
+        Span::from(t)
+    }
+
+    pub fn detailed_problem<'a>(&self) -> (Paragraph, Paragraph, Paragraph) {
+        let problem: &Problem = self.model.current_problem();
+        let prob_name = Paragraph::new(Spans::from(Self::bold(problem.problem_name.clone())))
+            .alignment(tui::layout::Alignment::Center);
+        let prob_descr = Paragraph::new(Spans::from(Self::text(problem.problem_statement.clone())))
+            .wrap(Wrap { trim: false });
+        let prob_exmaple = Paragraph::new(Spans::from(Self::text(problem.problem_example.clone())))
+            .wrap(Wrap { trim: false });
+
+        (prob_name, prob_descr, prob_exmaple)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum Menu {
+    Select,
+    Update,
+    Solve,
+}
+// test tests::bench_pow ... bench:      13,345 ns/iter (+/- 1,405)
