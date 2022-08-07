@@ -12,7 +12,7 @@ pub type Db = Vec<Rc<Problem>>;
 pub struct Model {
     pub db: Db,
     pub settings: RefCell<Settings>,
-    pub menu: RefCell<Menu>,
+    pub menu: Cell<Menu>,
     pub curr_prob_id: Cell<usize>,
 }
 
@@ -21,7 +21,7 @@ impl Model {
         Rc::new(Model {
             db: Model::load(&settings.db_path),
             settings: RefCell::new(settings),
-            menu: RefCell::new(Menu::Select),
+            menu: Cell::new(Menu::Select),
             curr_prob_id: Cell::new(0),
         })
     }
@@ -80,22 +80,29 @@ impl Model {
 }
 
 struct Command {
-    raw_pre_format: String
+    setup: String,
+    run: String
 }
 
 impl Command {
-    pub fn exec_script(&self, solution_path: &String)  -> String {
-        self.raw_pre_format.replace("{solution_path}", solution_path)
+    pub fn exec_script(&self, solution_path: &String, args: &String)  -> String {
+        [
+            self.setup.replace("{solution_path}", solution_path),
+            self.run.replace("{args}", args)
+        ].join(" && ")
     }
 }
 
-struct CodeRunner {
-    examples: Vec<Example>,
-    solution_path: String,
-    command: Command,   
-} impl CodeRunner {
 
-}
+// struct CodeRunner {
+//     examples: Vec<Example>,
+//     solution_path: String, 
+//     command: Command,   
+// } impl CodeRunner {
+//     fn run(&self) {
+//         let script = self.command.exec_script(solution_path)
+//     } 
+// }
 
 pub enum MessageToRunner {
     SetExamples(Vec<Example>),

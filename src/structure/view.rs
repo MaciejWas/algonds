@@ -1,3 +1,4 @@
+use tui::widgets::Block;
 use crate::structure::Difficulty;
 use crate::structure::ModelRef;
 use crate::structure::Problem;
@@ -57,6 +58,22 @@ impl From<&ModelRef> for View {
 }
 
 impl View {
+    pub fn block_with_title<'a>(&self, title: String) -> Block<'a> {
+        Block::default()
+            .borders(tui::widgets::Borders::ALL)
+            .title(title)
+            .title_style(Style::default()
+                .add_modifier(tui::style::Modifier::BOLD)
+            )
+    }
+    pub fn get_help(&self) -> Paragraph {
+        let spans = vec![
+            Span::from("help:)\nfsadfsadf\ndfsfdss\ndasdsad")
+        ];
+        let par = Spans::from(spans);
+        Paragraph::new(par).wrap(Wrap { trim: false })
+    }
+
     fn calculate_curr_problem_range(curr_prob_id: usize, row_n: usize) -> (usize, usize) {
         let mut end = row_n; // Index of last row to be shown
         while curr_prob_id >= end {
@@ -100,11 +117,7 @@ impl View {
             Self::marker(is_selected, self.settings.pretty),
             Self::num(id),
             Self::bold(prob.problem_name.clone()),
-            Self::separator(),
             Self::difficulty(prob.difficulty.clone()),
-            Self::separator(),
-            Self::begin_tags(),
-            Self::tags(&prob.tags),
         ];
         let par = Spans::from(spans);
         Paragraph::new(par).wrap(Wrap { trim: false })
@@ -117,33 +130,12 @@ impl View {
         )
     }
 
-    fn begin_tags() -> Span<'static> {
-        Span::from("tags: ")
-    }
-
-    fn tags<'a>(tags: &Vec<String>) -> Span<'a> {
-        let phrases = tags.join(", ");
-        Span::styled(
-            phrases,
-            tui::style::Style::default().add_modifier(tui::style::Modifier::ITALIC),
-        )
-    }
-
     fn difficulty<'a>(diff: Difficulty) -> Span<'a> {
         match diff {
-            Difficulty::Easy => {
-                Span::styled("Easy  ", Style::default().fg(tui::style::Color::Green))
-            }
-            Difficulty::Medium => Span::styled(
-                "Medium",
-                Style::default().fg(tui::style::Color::LightYellow),
-            ),
-            Difficulty::Hard => Span::styled("Hard  ", Style::default().fg(tui::style::Color::Red)),
+            Difficulty::Easy =>Span::styled(" (Easy)  ", Style::default().fg(tui::style::Color::Green)),
+            Difficulty::Medium => Span::styled(" (Medium) ", Style::default().fg(tui::style::Color::LightYellow)),
+            Difficulty::Hard => Span::styled(" (Hard)  ", Style::default().fg(tui::style::Color::Red)),
         }
-    }
-
-    fn separator() -> Span<'static> {
-        Span::from("   /     ")
     }
 
     fn bold<'a>(text: String) -> Span<'a> {
@@ -155,7 +147,7 @@ impl View {
 
     fn marker<'a>(is_selected: bool, is_pretty: bool) -> Span<'a> {
         if is_selected {
-            let arrow = if is_pretty { " 🡆   " } else { "-->" };
+            let arrow = if is_pretty { " 🡆   " } else { " -->  " };
             return Span::styled(arrow, Style::default().fg(tui::style::Color::Cyan));
         }
 
@@ -163,7 +155,7 @@ impl View {
     }
 
     pub fn curr_menu(&self) -> Menu {
-        self.model.menu.borrow().clone()
+        self.model.menu.get()
     }
 
     fn text<'a>(t: String) -> Span<'a> {
@@ -183,10 +175,11 @@ impl View {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Menu {
     Select,
     Update,
     Solve,
+    Help
 }
 // test tests::bench_pow ... bench:      13,345 ns/iter (+/- 1,405)

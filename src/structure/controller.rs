@@ -47,8 +47,9 @@ impl From<&ModelRef> for Controller {
 impl Controller {
     pub fn react_to_event(&self, event: Event) -> EventResult {
         if let Event::Key(key) = event {
-            let menu = self.model.menu.borrow_mut();
-            match *menu {
+            let menu = self.model.menu.get();
+            match menu {
+                Menu::Help => self.change_menu(Menu::Select),
                 Menu::Select => match key.code {
                     KeyCode::Char('j') => {
                         let curr_id = self.model.curr_prob_id.get();
@@ -65,13 +66,30 @@ impl Controller {
                             return DoRefresh;
                         }
                     }
-                    KeyCode::Char('q') => return Quit,
+                    KeyCode::Enter => {
+                        self.change_menu(Menu::Solve);
+                        return DoRefresh
+                    }
                     _ => {}
                 },
                 _ => {}
             }
+
+            if let KeyCode::Char('q') = key.code {
+                return Quit
+            }
+
+            if let KeyCode::Char('h') = key.code {
+                self.change_menu(Menu::Help);
+                return DoRefresh
+            }
+
             return NoRefresh;
         }
         return NoRefresh;
+    }
+
+    fn change_menu(&self, new_menu: Menu) {
+        self.model.menu.set(new_menu)
     }
 }
