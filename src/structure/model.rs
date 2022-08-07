@@ -1,3 +1,5 @@
+use crate::structure::common::ExampleStatus;
+use crate::structure::common::Example;
 use std::cell::Cell;
 use crate::structure::common::Problem;
 use crate::structure::view::Menu;
@@ -76,3 +78,36 @@ impl Model {
         ps
     }
 }
+
+struct Command {
+    raw_pre_format: String
+}
+
+impl Command {
+    pub fn exec_script(&self, solution_path: &String)  -> String {
+        self.raw_pre_format.replace("{solution_path}", solution_path)
+    }
+}
+
+struct CodeRunner {
+    examples: Vec<Example>,
+    solution_path: String,
+    command: Command,   
+} impl CodeRunner {
+
+}
+
+pub enum MessageToRunner {
+    SetExamples(Vec<Example>),
+    SetSolution(String),
+    SetCommand(Command),
+    Run,
+    Abort
+}
+
+pub enum MessageFromRunner {
+    Finished(usize, ExampleStatus)
+}
+
+
+

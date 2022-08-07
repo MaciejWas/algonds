@@ -1,3 +1,5 @@
+use tui::layout::Rect;
+use tui::widgets::Widget;
 use tui::widgets::Block;
 use crate::structure::controller::EventResult;
 use crate::structure::view::Menu;
@@ -39,8 +41,8 @@ impl AppState {
         let (d_name, d_descr, d_example) = self.view.detailed_problem();
 
         term.draw(|frame| {
-            frame.render_widget(Block::default().borders(Borders::ALL).title("Problems"), layout.rows_box);
-            frame.render_widget(Block::default().borders(Borders::ALL).title("Selected"), layout.problem_box);
+            frame.render_widget(Self::borders("Available Challenges"), layout.rows_box);
+            frame.render_widget(Self::borders("Selected"), layout.problem_box);
 
             for (problem, row) in zip(problems, layout.rows) {
                 frame.render_widget(problem, row);
@@ -51,6 +53,10 @@ impl AppState {
         })
         .unwrap();
     }
+
+    fn borders<'a>(title: &'a str) -> Block<'a> {
+        Block::default().borders(Borders::ALL).title(title)
+    } 
 
     pub fn update(&mut self) {}
 
@@ -69,7 +75,7 @@ mod select_menu_utils {
         let horizontal_split_data = vec![Constraint::Percentage(60), Constraint::Percentage(40)];
         let horizontal_splitter = Layout::default()
             .constraints(horizontal_split_data)
-            .margin(2)
+            .margin(1)
             .direction(Direction::Horizontal);
         let windows = horizontal_splitter.split(term_size);
         (windows[0], windows[1])
@@ -80,7 +86,7 @@ mod select_menu_utils {
         let row_split_data = vec![Constraint::Length(3); div3];
         let row_splitter = Layout::default()
             .constraints(row_split_data)
-            .margin(1)
+            .margin(2)
             .direction(Direction::Vertical);
         let rows = row_splitter.split(term_size);
         rows
