@@ -1,3 +1,4 @@
+use crate::structure::common::Example;
 use tui::widgets::Block;
 use crate::structure::Difficulty;
 use crate::structure::ModelRef;
@@ -168,10 +169,18 @@ impl View {
             .alignment(tui::layout::Alignment::Center);
         let prob_descr = Paragraph::new(Spans::from(Self::text(problem.problem_statement.clone())))
             .wrap(Wrap { trim: false });
-        let prob_exmaple = Paragraph::new(Spans::from(Self::text(problem.problem_example.clone())))
+        let prob_exmaple = Self::example(problem.examples.get(0).unwrap())
             .wrap(Wrap { trim: false });
 
         (prob_name, prob_descr, prob_exmaple)
+    }
+
+    fn example<'a>(exmp: &Example) -> Paragraph<'a> {
+        Paragraph::new(vec![
+            Spans::from(Self::bold("Example:".to_string())),
+            Spans::from("input: \n\n".to_string() + &exmp.input),
+            Spans::from("output: \n\n".to_string() + &exmp.output),
+        ])
     }
 }
 

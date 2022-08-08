@@ -15,22 +15,15 @@ pub enum Difficulty {
 pub struct Problem {
     pub problem_name: String,
     pub problem_statement: String,
-    pub problem_example: String,
     pub tags: Vec<String>,
+    pub examples: Vec<Example>,
     pub difficulty: Difficulty,
 }
 
-impl Default for Problem {
-    fn default() -> Self {
-        Problem {problem_name: "Reverse Linked Binary HashTable".into(), problem_statement: "statementstatementstatementstatemenementstatementstatementstatementstatementstementstatementstatementstatementstatementstementstatementstatementstatementstatementstementstatementstatementstatementstatementsttstatementstatementstatementstatementstatementstatementstatementstatementstatementstatementstatementstatementstatement".into(), 
-    problem_example: "exampleexampleexampleexampleexampleempleexampleexampleempleexampleexampleempleexampleexampleexampleexampleexampleexampleexampleexampleexampleexample".into(), tags: vec!["tag1".into(), "tag2fsadf".into(), "tag1".into(), "tag2fsadf".into(), "tag1".into(), "tag2fsadf".into()], difficulty: Easy}
-    }
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Example {
-    input: String,
-    output: String,
+    pub input: String,
+    pub output: String,
 }
 
 pub enum ExampleStatus {

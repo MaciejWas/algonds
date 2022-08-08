@@ -114,7 +114,7 @@ mod select_menu_utils {
     }
 
     fn do_row_split_for_select_menu(term_size: Rect) -> Vec<Rect> {
-        let div3 = term_size.height as usize / 3;
+        let div3 = (term_size.height - 2) as usize / 3;
         let row_split_data = vec![Constraint::Length(3); div3];
         let row_splitter = Layout::default()
             .constraints(row_split_data)

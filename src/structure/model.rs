@@ -68,14 +68,10 @@ impl Model {
     }
 
     fn load_from_file(path: &String) -> Db {
-        // let serialized = std::fs::read_to_string(path)
-        // .expect("Something went wrong reading the file");
-        // serde_yaml::from_str(&serialized).unwrap()
-        let mut ps = Vec::new();
-        for i in 0..40 {
-            ps.push(Rc::new(Problem::default()));
-        }
-        ps
+        let serialized = std::fs::read_to_string(path)
+            .expect("Something went wrong reading the file");
+        let problems: Vec<Problem> = serde_yaml::from_str(&serialized).unwrap();
+        problems.into_iter().map(Rc::new).collect()
     }
 }
 

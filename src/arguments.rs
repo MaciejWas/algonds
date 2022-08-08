@@ -31,11 +31,11 @@ pub enum Action {
     Update,
 
     /// Runs the terminal UI
-    Run(Run),
+    Run,
 }
 
 #[derive(clap::Args, Debug)]
 pub struct Run {
-    #[clap(value_parser)]
-    pub solution_path: String,
+    // #[clap(value_parser)]
+    // pub solution_path: String,
 }
