@@ -9,7 +9,7 @@ pub mod model;
 pub mod settings;
 pub mod view;
 
-use common::{Difficulty, Problem};
+use common::*;
 use model::Model;
 use settings::Settings;
 

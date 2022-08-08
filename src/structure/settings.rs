@@ -1,12 +1,14 @@
 use crate::AppArgs;
 use serde::{Deserialize, Serialize};
 
-const DB_ADDR: &str = "fsdafsadfs";
+const DB_ADDR: &str = "https://raw.githubusercontent.com/MaciejWas/algonds/main/src/data/db.yaml";
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Settings {
     pub db_path: String,
     pub solution_path: String,
+    pub compilation_step: String,
+    pub run_step: String,
     pub pretty: bool,
 }
 
@@ -15,6 +17,8 @@ impl Default for Settings {
         Self {
             db_path: DB_ADDR.to_string(),
             solution_path: "./solution.py".to_string(),
+            compilation_step: "echo \"no compilation\"".to_string(),
+            run_step: "python {solution_path} {args}".to_string(),
             pretty: true,
         }
     }
@@ -27,7 +31,15 @@ impl From<&AppArgs> for Settings {
         args.db_path
             .as_ref()
             .map(|path| settings.db_path = path.clone());
+        args.solution_path.as_ref()
+            .map(|txt| settings.solution_path = txt.clone());
+        args.compilation_step.as_ref()
+            .map(|txt| settings.compilation_step = txt.clone());
+        args.run_step.as_ref()
+            .map(|txt| settings.run_step = txt.clone());
+
         settings.pretty = !args.disable_unicode;
+
 
         settings
     }

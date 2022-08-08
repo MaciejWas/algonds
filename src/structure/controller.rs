@@ -1,6 +1,6 @@
 use crate::event::KeyEvent;
 use crate::structure::controller::EventResult::*;
-use crate::structure::view::{Menu};
+use crate::structure::view::Menu;
 use crate::structure::ModelRef;
 use crossterm::event::{Event, KeyCode};
 use std::rc::Rc;
@@ -41,12 +41,11 @@ impl From<&ModelRef> for Controller {
 impl Controller {
     fn next_problem(&self) -> EventResult {
         let curr_id = self.model.curr_prob_id.get();
-            if curr_id < self.model.total_problems() - 1
-            {
-                self.model.curr_prob_id.set(curr_id + 1);
-                return DoRefresh;
-            }
-            return NoRefresh
+        if curr_id < self.model.total_problems() - 1 {
+            self.model.curr_prob_id.set(curr_id + 1);
+            return DoRefresh;
+        }
+        return NoRefresh;
     }
 
     fn prev_problem(&self) -> EventResult {
@@ -55,12 +54,12 @@ impl Controller {
             self.model.curr_prob_id.set(curr_id - 1);
             return DoRefresh;
         }
-        return NoRefresh
+        return NoRefresh;
     }
 
     fn universal_actions(&self, key: KeyEvent) -> EventResult {
         if let KeyCode::Char('q') = key.code {
-            return Quit
+            return Quit;
         }
 
         if let KeyCode::Char('c') = key.code && key.modifiers == crossterm::event::KeyModifiers::CONTROL{
@@ -69,7 +68,7 @@ impl Controller {
 
         if let KeyCode::Char('h') = key.code {
             self.change_menu(Menu::Help);
-            return DoRefresh
+            return DoRefresh;
         }
 
         NoRefresh
@@ -79,8 +78,8 @@ impl Controller {
         match key.code {
             KeyCode::Char('j') => self.next_problem(),
             KeyCode::Char('k') => self.prev_problem(),
-            KeyCode::Enter     => self.change_menu(Menu::Solve),
-            _                  => self.universal_actions(key)
+            KeyCode::Enter => self.change_menu(Menu::Solve),
+            _ => self.universal_actions(key),
         }
     }
 
@@ -88,23 +87,56 @@ impl Controller {
         self.change_menu(Menu::Select)
     }
 
+    fn handle_input(&self, key: KeyEvent) -> EventResult{
+        if let KeyCode::Char(c) = key.code {
+            self.model.add_to_input(c);
+        }
+
+        if let KeyCode::Backspace = key.code {
+            self.model.input.borrow_mut().pop();
+        }
+
+        if let KeyCode::Enter = key.code {
+            self.model.save_input();
+            self.model.wipe_input();
+            self.model.finish_input();
+            return DoRefresh
+        }
+
+        if let KeyCode::Char('c') = key.code && key.modifiers == crossterm::event::KeyModifiers::CONTROL {
+            return Quit
+        }
+        
+        DoRefresh
+    }
+
     fn handle_solve_menu(&self, key: KeyEvent) -> EventResult {
+        if self.model.is_in_input_mode() {
+            return self.handle_input(key);
+        }
+
         match key.code {
+            KeyCode::Char('c') => self.enter_compilation_input(),
             // KeyCode::Char('j') => self.next_problem(),
             // KeyCode::Char('k') => self.prev_problem(),
             KeyCode::Char('q') => self.change_menu(Menu::Select),
-            _                  => self.universal_actions(key)
+            _ => self.universal_actions(key),
         }
+    }
+
+    fn enter_compilation_input(&self) -> EventResult {
+        self.model.direct_input_to(crate::structure::common::InputField::CompileCommand);
+        DoRefresh
     }
 
     pub fn react_to_event(&self, event: Event) -> EventResult {
         if let Event::Key(key) = event {
             return match self.model.menu.get() {
-                Menu::Help   => self.handle_help_menu(),
+                Menu::Help => self.handle_help_menu(),
                 Menu::Select => self.handle_select_menu(key),
-                Menu::Solve  => self.handle_solve_menu(key),
-                _            => self.universal_actions(key)
-            }
+                Menu::Solve => self.handle_solve_menu(key),
+                _ => self.universal_actions(key),
+            };
         }
         return NoRefresh;
     }

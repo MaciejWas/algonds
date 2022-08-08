@@ -66,7 +66,7 @@ mod tests {
     use crate::structure::model::Model;
     use crate::structure::settings::Settings;
     use crate::structure::view::View;
-    use test::{black_box, Bencher};
+    use test::{Bencher};
 
     #[bench]
     fn bench_table(b: &mut Bencher) {
@@ -75,7 +75,7 @@ mod tests {
 
         b.iter(|| {
             // Inner closure, the actual test
-            view.get_problems_to_select(20);
+            view.get_problems_to_select(30);
         });
     }
 

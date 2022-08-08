@@ -1,5 +1,4 @@
 use crate::structure::common::Example;
-use tui::widgets::Block;
 use crate::structure::Difficulty;
 use crate::structure::ModelRef;
 use crate::structure::Problem;
@@ -10,6 +9,7 @@ use std::rc::Rc;
 use tui::style::Style;
 use tui::text::Span;
 use tui::text::Spans;
+use tui::widgets::Block;
 use tui::widgets::Paragraph;
 use tui::widgets::Wrap;
 
@@ -45,7 +45,7 @@ impl ProblemCacher {
 pub struct View {
     model: ModelRef,
     settings: Settings,
-    last_prob_batch: ProblemCacher,
+    problem_cacher: ProblemCacher,
 }
 
 impl From<&ModelRef> for View {
@@ -53,7 +53,7 @@ impl From<&ModelRef> for View {
         Self {
             model: Rc::clone(model),
             settings: model.settings.borrow().clone(),
-            last_prob_batch: ProblemCacher::default(),
+            problem_cacher: ProblemCacher::default(),
         }
     }
 }
@@ -63,16 +63,27 @@ impl View {
         Block::default()
             .borders(tui::widgets::Borders::ALL)
             .title(title)
-            .title_style(Style::default()
-                .add_modifier(tui::style::Modifier::BOLD)
-            )
+            .title_style(Style::default().add_modifier(tui::style::Modifier::BOLD))
     }
     pub fn get_help(&self) -> Paragraph {
         let spans = vec![
-            Span::from("help:)\nfsadfsadf\ndfsfdss\ndasdsad")
+            Spans::from(Self::bold("General".to_string())),
+            Spans::from("  h - open help"),
+            Spans::from("  q - quit current menu"),
+            Spans::from("  ctrl + c - exit application"),
+            Spans::from(""),
+            Spans::from(Self::bold("Select Problem Menu".to_string())),
+            Spans::from("  j / k - move cursor up / down"),
+            Spans::from("  enter - select problem "),
+            Spans::from(""),
+            Spans::from(Self::bold("Solve Problem Menu".to_string())),
+            Spans::from("  c - set compilation step"),
+            Spans::from("  r - set run step"),
+            Spans::from("  enter - run all examples / save compilation step / save run step"),
+            Spans::from("  i - show detailed information about last run"),
+            Spans::from("  f - run last failed example"),
         ];
-        let par = Spans::from(spans);
-        Paragraph::new(par).wrap(Wrap { trim: false })
+        Paragraph::new(spans).wrap(Wrap { trim: false })
     }
 
     fn calculate_curr_problem_range(curr_prob_id: usize, row_n: usize) -> (usize, usize) {
@@ -84,18 +95,15 @@ impl View {
         (end - row_n, end)
     }
 
-    pub fn get_problems_to_select<'a>(&self, row_n: usize) -> Vec<Paragraph<'a>> {
+    pub fn get_problems_to_select<'a>(&self, available_rows: usize) -> Vec<Paragraph<'a>> {
         let current_prob_id = self.model.curr_prob_id.get();
-        let range = Self::calculate_curr_problem_range(current_prob_id, row_n);
+        let range = Self::calculate_curr_problem_range(current_prob_id, available_rows);
 
-        let relevant_problems = self
-            .last_prob_batch
-            .get_cached(range)
-            .unwrap_or({
-                let r = self.model.get_problems_in_range(range.0, range.1);
-                self.last_prob_batch.remember(range, &r);
-                r
-            });
+        let relevant_problems = self.problem_cacher.get_cached(range).unwrap_or({
+            let problems = self.model.get_problems_in_range(range.0, range.1);
+            self.problem_cacher.remember(range, &problems);
+            problems
+        });
 
         relevant_problems
             .into_iter()
@@ -133,9 +141,16 @@ impl View {
 
     fn difficulty<'a>(diff: Difficulty) -> Span<'a> {
         match diff {
-            Difficulty::Easy =>Span::styled(" (Easy)  ", Style::default().fg(tui::style::Color::Green)),
-            Difficulty::Medium => Span::styled(" (Medium) ", Style::default().fg(tui::style::Color::LightYellow)),
-            Difficulty::Hard => Span::styled(" (Hard)  ", Style::default().fg(tui::style::Color::Red)),
+            Difficulty::Easy => {
+                Span::styled(" (Easy)  ", Style::default().fg(tui::style::Color::Green))
+            }
+            Difficulty::Medium => Span::styled(
+                " (Medium) ",
+                Style::default().fg(tui::style::Color::LightYellow),
+            ),
+            Difficulty::Hard => {
+                Span::styled(" (Hard)  ", Style::default().fg(tui::style::Color::Red))
+            }
         }
     }
 
@@ -169,8 +184,8 @@ impl View {
             .alignment(tui::layout::Alignment::Center);
         let prob_descr = Paragraph::new(Spans::from(Self::text(problem.problem_statement.clone())))
             .wrap(Wrap { trim: false });
-        let prob_exmaple = Self::example(problem.examples.get(0).unwrap())
-            .wrap(Wrap { trim: false });
+        let prob_exmaple =
+            Self::example(problem.examples.get(0).unwrap()).wrap(Wrap { trim: false });
 
         (prob_name, prob_descr, prob_exmaple)
     }
@@ -182,6 +197,10 @@ impl View {
             Spans::from("output: \n\n".to_string() + &exmp.output),
         ])
     }
+
+    pub fn additional_data<'a>(&self) -> Paragraph<'a> {
+        self.model.additional_data().into()
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -189,6 +208,10 @@ pub enum Menu {
     Select,
     Update,
     Solve,
-    Help
+    Help,
+}
+
+impl Default for Menu {
+    fn default() -> Self { Self::Select }
 }
 // test tests::bench_pow ... bench:      13,345 ns/iter (+/- 1,405)

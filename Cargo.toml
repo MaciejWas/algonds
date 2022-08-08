@@ -11,4 +11,4 @@ tui = "0.18.0"
 crossterm = "0.24.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
-minreq = { version = "2.6.0", features = ["punycode"] }
+minreq = { version = "2.6.0", features = ["punycode", "https"] }

@@ -23,6 +23,15 @@ pub struct AppArgs {
     /// Path to yaml file with all problems, can be a web link
     #[clap(long, value_parser)]
     pub db_path: Option<String>,
+
+    #[clap(long, value_parser)]
+    pub solution_path: Option<String>,
+    
+    #[clap(long, value_parser)]
+    pub compilation_step: Option<String>,
+
+    #[clap(long, value_parser)]
+    pub run_step: Option<String>,
 }
 
 #[derive(clap::Subcommand, Debug)]
