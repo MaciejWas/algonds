@@ -52,7 +52,7 @@ impl From<&Difficulty> for Span<'_> {
 #[derive(Debug, Clone, Copy)]
 pub enum InputField {
     CompileCommand,
-    RunCommand
+    RunCommand,
 }
 
 pub enum AdditionalData {
@@ -65,10 +65,10 @@ pub enum AdditionalData {
 impl<'a> Into<Paragraph<'a>> for AdditionalData {   
     fn into(self) -> Paragraph<'a> { 
         match self {
-            Self::CompileCommand(command) => Paragraph::new(Spans::from("Compilation script: ".to_string() + &command + "▮")),
-            Self::RunCommand(command) => Paragraph::new(Spans::from("Compilation script: ".to_string() + &command + "▮")),
+            Self::CompileCommand(command) => Paragraph::new(Spans::from("Edit compilation step: ".to_string() + &command + "▮")),
+            Self::RunCommand(command) => Paragraph::new(Spans::from("Edit run step: ".to_string() + &command + "▮")),
             Self::RunningBar(u) => Paragraph::new(Spans::from("Running: ".to_string() + &u.to_string())),
-            Self::None => Paragraph::new(Spans::from("Good luck!")),
+            Self::None => Paragraph::new(Spans::from("r - edit run script, c - edit compilation script, enter - run tests")),
         }
     }
 }

@@ -1,8 +1,12 @@
-use crate::event::KeyEvent;
-use crate::structure::controller::EventResult::*;
-use crate::structure::view::Menu;
-use crate::structure::ModelRef;
+use crate::structure::{
+    InputField, 
+    InputField::*, 
+    controller::EventResult::*, 
+    view::Menu, 
+    ModelRef
+};
 use crossterm::event::{Event, KeyCode};
+use crate::event::KeyEvent;
 use std::rc::Rc;
 
 pub enum EventResult {
@@ -110,23 +114,22 @@ impl Controller {
         DoRefresh
     }
 
+    fn edit(&self, field: InputField) -> EventResult {
+        self.model.direct_input_to(field);
+        DoRefresh
+    }
+
     fn handle_solve_menu(&self, key: KeyEvent) -> EventResult {
         if self.model.is_in_input_mode() {
             return self.handle_input(key);
         }
 
         match key.code {
-            KeyCode::Char('c') => self.enter_compilation_input(),
-            // KeyCode::Char('j') => self.next_problem(),
-            // KeyCode::Char('k') => self.prev_problem(),
+            KeyCode::Char('c') => self.edit(CompileCommand),
+            KeyCode::Char('r') => self.edit(RunCommand),
             KeyCode::Char('q') => self.change_menu(Menu::Select),
             _ => self.universal_actions(key),
         }
-    }
-
-    fn enter_compilation_input(&self) -> EventResult {
-        self.model.direct_input_to(crate::structure::common::InputField::CompileCommand);
-        DoRefresh
     }
 
     pub fn react_to_event(&self, event: Event) -> EventResult {

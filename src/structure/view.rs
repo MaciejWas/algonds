@@ -77,8 +77,10 @@ impl View {
             Spans::from("  enter - select problem "),
             Spans::from(""),
             Spans::from(Self::bold("Solve Problem Menu".to_string())),
-            Spans::from("  c - set compilation step"),
-            Spans::from("  r - set run step"),
+            Spans::from("  c - set compilation step. Replace actual path of the file with \"{solution_path}\""),
+            Spans::from("      Example: gcc {solution_path} -o ./solution"),
+            Spans::from("  r - set run step. Replace arguments with \"{args}\""),
+            Spans::from("      Example: ./solution {args}"),
             Spans::from("  enter - run all examples / save compilation step / save run step"),
             Spans::from("  i - show detailed information about last run"),
             Spans::from("  f - run last failed example"),
@@ -193,13 +195,27 @@ impl View {
     fn example<'a>(exmp: &Example) -> Paragraph<'a> {
         Paragraph::new(vec![
             Spans::from(Self::bold("Example:".to_string())),
-            Spans::from("input: \n\n".to_string() + &exmp.input),
-            Spans::from("output: \n\n".to_string() + &exmp.output),
+            Spans::from("    input: \n\n".to_string() + &exmp.input),
+            Spans::from("    output: \n\n".to_string() + &exmp.output),
         ])
     }
 
     pub fn additional_data<'a>(&self) -> Paragraph<'a> {
         self.model.additional_data().into()
+    }
+
+    pub fn current_commands<'a>(&self) -> Paragraph<'a> {
+        let settings = self.model.settings.borrow();
+        let compilation_step = settings.compilation_step.clone();
+        let run_step = settings.run_step.clone();
+        Paragraph::new(vec![
+            Spans::from("".to_string()), // New line
+            Spans::from(
+                vec![Self::bold("Compilation step: ".to_string()), Span::from(compilation_step)]), 
+            Spans::from(
+                vec![Self::bold("Run step:         ".to_string()), Span::from(run_step)])
+        ])
+
     }
 }
 

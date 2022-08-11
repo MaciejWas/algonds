@@ -1,3 +1,4 @@
+use crate::structure::model::RunRequest::PleaseRun;
 use crate::structure::common::*;
 use crate::structure::view::Menu;
 use crate::structure::Settings;
@@ -8,8 +9,8 @@ use std::rc::Rc;
 pub type Db = Vec<Rc<Problem>>;
 
 pub struct Model {
-    pub db: Db,
-    pub directing_input_to: Cell<Option<InputField>>,
+    db: Db,
+    directing_input_to: Cell<Option<InputField>>,
     pub input: RefCell<String>,
     pub settings: RefCell<Settings>,
     pub menu: Cell<Menu>,
@@ -104,7 +105,7 @@ impl Model {
         if let Some(field) = self.directing_input_to.get() {
             return match field {
                 InputField::CompileCommand => AdditionalData::CompileCommand(self.input.borrow().clone()),
-                InputField::RunCommand => AdditionalData::RunCommand(self.input.borrow().clone())
+                InputField::RunCommand => AdditionalData::RunCommand(self.input.borrow().clone()),
             }
         }
 
@@ -113,10 +114,11 @@ impl Model {
 
     pub fn save_input(&self) {
         let mut settings = self.settings.borrow_mut();
+        let finished_input = self.input.borrow().clone();
         match self.directing_input_to.get() {
             Some(field) => match field {
-                InputField::CompileCommand => settings.compilation_step = self.input.borrow().clone(),
-                InputField::RunCommand => settings.run_step = self.input.borrow().clone(),
+                InputField::CompileCommand => settings.compilation_step = finished_input,
+                InputField::RunCommand => settings.run_step = finished_input,
             }
             None => {}
         }
@@ -127,39 +129,94 @@ impl Model {
     }
 }
 
-struct Command {
-    setup: String,
-    run: String,
+#[derive(Clone)]
+enum RunRequest {
+    PleaseRun {
+        compile_script: String,
+        run_script: String,
+        examples: Vec<Example>
+    },
+    PleaseStop
 }
 
-impl Command {
-    pub fn exec_script(&self, solution_path: &String, args: &String) -> String {
-        [
-            self.setup.replace("{solution_path}", solution_path),
-            self.run.replace("{args}", args),
-        ]
-        .join(" && ")
+struct RunResponse {
+    id: usize,
+    result: ExampleStatus
+}
+
+use std::sync::mpsc;
+use std::thread;
+
+struct CodeRunner {
+    incoming: mpsc::Receiver<RunResponse>,
+    outgoing:  mpsc::Sender<RunRequest>
+} impl CodeRunner {
+    pub fn new() -> Self {
+        let (to_main, from_runner) = mpsc::channel();
+        let (to_runner, from_main) = mpsc::channel();
+
+        thread::spawn(move || {
+            RemoteRunner::new(from_main, to_main).run();
+        });
+
+        Self { incoming: from_runner, outgoing: to_runner }
     }
 }
 
-// struct CodeRunner {
-//     examples: Vec<Example>,
-//     solution_path: String,
-//     command: Command,
-// } impl CodeRunner {
-//     fn run(&self) {
-//         let script = self.command.exec_script(solution_path)
-//     }
-// }
-
-pub enum MessageToRunner {
-    SetExamples(Vec<Example>),
-    SetSolution(String),
-    SetCommand(Command),
-    Run,
-    Abort,
+struct RemoteRunner {
+    incoming: mpsc::Receiver<RunRequest>,
+    outgoing: mpsc::Sender<RunResponse>,
+    last_run_reqest: Option<RunRequest>,
+    running: usize,
 }
 
-pub enum MessageFromRunner {
-    Finished(usize, ExampleStatus),
+impl RemoteRunner {
+    pub fn new(incoming: mpsc::Receiver<RunRequest>, outgoing: mpsc::Sender<RunResponse>) -> Self {
+        Self { incoming, outgoing, last_run_reqest: None, running: 0 }
+    }
+
+    pub fn run(mut self) {
+        loop {
+            self.recv();
+            if let Some(reqw) = self.last_run_reqest.clone() {
+                match reqw {
+                    RunRequest::PleaseStop => continue,
+                    RunRequest::PleaseRun {examples, compile_script, run_script } => {
+                        for (i, ex) in examples.into_iter().enumerate() {
+                            if self.should_stop() {
+                                break
+                            }
+
+                            let result = self.run_example(ex);
+                            self.send_result(result, i);
+                        }
+                    }
+                }
+            }
+        }    
+    }
+
+    fn should_stop(&self) -> bool {
+        todo!()
+    }
+
+    fn run_example(&self, ex: Example) -> ExampleStatus{
+        todo!()
+    }
+
+    fn send_result(&self, result: ExampleStatus, example_id: usize) {
+        todo!()
+    }
+
+    fn recv(&mut self) {
+        match self.incoming.recv_timeout(std::time::Duration::from_secs(1)) {
+            Ok(request) => match request {
+                RunRequest::PleaseRun { ..} => {
+                    self.last_run_reqest = Some(request)
+                },
+                RunRequest::PleaseStop => self.last_run_reqest = None,
+            }
+            Err(_) => panic!("this should never happen!"),
+        }
+    } 
 }

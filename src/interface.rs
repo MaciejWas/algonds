@@ -1,3 +1,5 @@
+use tui::layout::Margin;
+use tui::layout::Rect;
 use crate::structure::controller::EventResult;
 use crate::structure::view::Menu;
 use crossterm::event::Event;
@@ -20,8 +22,8 @@ impl AppState {
     fn render_help<B: Backend>(&self, term: &mut Terminal<B>) {
         let term_size = term.size().unwrap();
         let help_text = self.view.get_help();
-        let outer_window = problem_menu_utils::add_margins(term_size);
-        let inner_window = problem_menu_utils::add_margins(outer_window);
+        let outer_window = add_margins(term_size);
+        let inner_window = add_margins(outer_window);
 
         term.draw(|frame| {
             frame.render_widget(self.view.block_with_title("Help".to_string()), outer_window);
@@ -37,17 +39,19 @@ impl AppState {
         let term_size = term.size().unwrap();
         let layout = problem_menu_utils::layout_for_problem(term_size);
 
-        let current_problem = self.view.detailed_problem();
+        let (name, statement, example) = self.view.detailed_problem();
             
         term.draw(|frame| {
             frame.render_widget(
                 self.view.block_with_title("Solving".to_string()),
                 layout.window,
             );
-            frame.render_widget(current_problem.0, layout.problem_name);
-            frame.render_widget(current_problem.1, layout.problem_statement);
-            frame.render_widget(current_problem.2, layout.problem_example);
+            frame.render_widget(name, layout.problem_name);
+            frame.render_widget(statement, layout.problem_statement);
+            frame.render_widget(example, layout.problem_example);
             frame.render_widget(self.view.additional_data(), layout.last_run_data);
+            frame.render_widget(self.view.current_commands(), layout.commands);
+
         })
         .unwrap();
     }
@@ -95,8 +99,19 @@ impl AppState {
     }
 }
 
+
+pub fn add_margins(term_size: Rect) -> Rect {
+    term_size.inner(&Margin {
+        vertical: 3,
+        horizontal: 3,
+    })
+}
+
 mod select_menu_utils {
+    use super::add_margins;
     use tui::layout::{Constraint, Direction, Layout, Rect};
+    
+    const SPLIT_60_40: [Constraint; 2] = [Constraint::Percentage(60), Constraint::Percentage(40)];
 
     pub fn get_term_footnote(term: Rect) -> Rect {
         let footnote_splitter = Layout::default()
@@ -105,9 +120,8 @@ mod select_menu_utils {
     }
 
     fn do_horizontal_split_for_select_menu(term_size: Rect) -> (Rect, Rect) {
-        let horizontal_split_data = vec![Constraint::Percentage(60), Constraint::Percentage(40)];
         let horizontal_splitter = Layout::default()
-            .constraints(horizontal_split_data)
+            .constraints(SPLIT_60_40)
             .margin(1)
             .direction(Direction::Horizontal);
         let windows = horizontal_splitter.split(term_size);
@@ -135,7 +149,7 @@ mod select_menu_utils {
             .constraints(vertical_split_data)
             .margin(1)
             .direction(Direction::Vertical);
-        let paragraphs = vertical_splitter.split(term_size);
+        let paragraphs = vertical_splitter.split(add_margins(term_size));
         (paragraphs[0], paragraphs[1], paragraphs[2])
     }
 
@@ -166,41 +180,29 @@ mod problem_menu_utils {
     use tui::layout::Margin;
     use tui::layout::Rect;
 
-    // const split_10_40_40_10: Vec<Constraint> = vec![
-    //     Constraint::Percentage(10),
-    //     Constraint::Percentage(40),
-    //     Constraint::Percentage(40),
-    //     Constraint::Percentage(10),
-    // ];
-
     pub struct ProblemLayout {
         pub window: Rect,
         pub problem_name: Rect,
         pub problem_statement: Rect,
         pub problem_example: Rect,
         pub last_run_data: Rect,
+        pub commands: Rect
     }
 
-    pub fn add_margins(term_size: Rect) -> Rect {
-        term_size.inner(&Margin {
-            vertical: 3,
-            horizontal: 3,
-        })
-    }
+    const SPLIT: [Constraint; 5] = [
+        Constraint::Percentage(5),
+        Constraint::Percentage(30),
+        Constraint::Percentage(30),
+        Constraint::Percentage(10),
+        Constraint::Percentage(25),
+    ];
 
     pub fn layout_for_problem(term_size: Rect) -> ProblemLayout {
         let window = term_size; // add_margins(term_size);
 
-        let split_10_40_40_10: Vec<Constraint> = vec![
-            Constraint::Percentage(10),
-            Constraint::Percentage(40),
-            Constraint::Percentage(40),
-            Constraint::Percentage(10),
-        ];
-
         let vertical_splitter = Layout::default()
-            .constraints(split_10_40_40_10)
-            .margin(6)
+            .constraints(SPLIT)
+            .margin(3)
             .direction(Direction::Vertical);
 
         let paragraphs = vertical_splitter.split(window);
@@ -210,37 +212,7 @@ mod problem_menu_utils {
             problem_statement: paragraphs[1],
             problem_example: paragraphs[2],
             last_run_data: paragraphs[3],
+            commands: paragraphs[4],
         }
-    }
-}
-
-mod popup_utils {
-    use tui::layout::Layout;
-    use tui::layout::Constraint;
-    use tui::layout::Rect;
-
-    // const vertical_split_data: Vec<Constraint> = vec![
-    //         Constraint::Percentage(25),
-    //         Constraint::Percentage(50),
-    //         Constraint::Percentage(25),
-    //     ];
-
-    pub fn popup_box(term_size: Rect) -> Rect {
-        let vertical_split_data = vec![
-            Constraint::Percentage(25),
-            Constraint::Percentage(50),
-            Constraint::Percentage(25),
-        ];
-
-        let horizontal_split_data = vec![
-            Constraint::Percentage(40),
-            Constraint::Percentage(20),
-            Constraint::Percentage(40),
-        ];
-
-        let vertical_splitter = Layout::default().constraints(vertical_split_data).direction(tui::layout::Direction::Vertical);
-        let horizontal_splitter = Layout::default().constraints(horizontal_split_data).direction(tui::layout::Direction::Horizontal);
-        
-        horizontal_splitter.split(vertical_splitter.split(term_size)[1])[1]
     }
 }
