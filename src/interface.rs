@@ -1,6 +1,6 @@
+use crate::structure::controller::AfterEvent;
 use tui::layout::Margin;
 use tui::layout::Rect;
-use crate::structure::controller::EventResult;
 use crate::structure::view::Menu;
 use crossterm::event::Event;
 use std::iter::zip;
@@ -13,7 +13,6 @@ impl AppState {
     pub fn render<B: Backend>(&self, term: &mut Terminal<B>) {
         match &self.view.curr_menu() {
             Menu::Solve => self.render_problem(term),
-            Menu::Update => self.render_update(term),
             Menu::Select => self.render_select(term),
             Menu::Help => self.render_help(term),
         }
@@ -26,7 +25,7 @@ impl AppState {
         let inner_window = add_margins(outer_window);
 
         term.draw(|frame| {
-            frame.render_widget(self.view.block_with_title("Help".to_string()), outer_window);
+            frame.render_widget(helpers::block_with_title("Help".to_string()), outer_window);
             frame.render_widget(help_text, inner_window);
             if inner_window.height < 14 {
                 frame.render_widget(Paragraph::new("Window is too small to show all help!".to_string()), select_menu_utils::get_term_footnote(term_size))
@@ -40,23 +39,23 @@ impl AppState {
         let layout = problem_menu_utils::layout_for_problem(term_size);
 
         let (name, statement, example) = self.view.detailed_problem();
+        let bottom_bar_data = self.view.additional_data();
+        let current_commands = self.view.current_commands();
             
         term.draw(|frame| {
             frame.render_widget(
-                self.view.block_with_title("Solving".to_string()),
+                helpers::block_with_title("Solving".to_string()),
                 layout.window,
             );
             frame.render_widget(name, layout.problem_name);
             frame.render_widget(statement, layout.problem_statement);
             frame.render_widget(example, layout.problem_example);
-            frame.render_widget(self.view.additional_data(), layout.last_run_data);
-            frame.render_widget(self.view.current_commands(), layout.commands);
+            frame.render_widget(bottom_bar_data, layout.last_run_data);
+            frame.render_widget(current_commands, layout.commands);
 
         })
         .unwrap();
     }
-
-    fn render_update<B: Backend>(&self, term: &mut Terminal<B>) {}
 
     fn render_select<B: Backend>(&self, term: &mut Terminal<B>) {
         let term_size = term.size().unwrap();
@@ -68,12 +67,11 @@ impl AppState {
 
         term.draw(|frame| {
             frame.render_widget(
-                self.view
-                    .block_with_title("Available Challenges".to_string()),
+                helpers::block_with_title("Available Challenges".to_string()),
                 layout.rows_box,
             );
             frame.render_widget(
-                self.view.block_with_title("Selected".to_string()),
+                helpers::block_with_title("Selected".to_string()),
                 layout.problem_box,
             );
 
@@ -94,8 +92,12 @@ impl AppState {
 
     pub fn update(&mut self) {}
 
-    pub fn react_to_event(&mut self, event: Event) -> EventResult {
+    pub fn react_to_event(&mut self, event: Event) -> AfterEvent {
         self.controller.react_to_event(event)
+    }
+
+    pub fn react_to_code_runner(&mut self) -> AfterEvent {
+        AfterEvent::NoRefresh// todo: Impl;
     }
 }
 
@@ -139,14 +141,15 @@ mod select_menu_utils {
         rows
     }
 
+    const SPLIT_10_50_40: [Constraint; 3] =  [
+        Constraint::Percentage(10),
+        Constraint::Percentage(50),
+        Constraint::Percentage(40),
+    ];      
+
     fn do_vertical_split_for_select_menu(term_size: Rect) -> (Rect, Rect, Rect) {
-        let vertical_split_data = vec![
-            Constraint::Percentage(10),
-            Constraint::Percentage(50),
-            Constraint::Percentage(40),
-        ];
         let vertical_splitter = Layout::default()
-            .constraints(vertical_split_data)
+            .constraints(SPLIT_10_50_40)
             .margin(1)
             .direction(Direction::Vertical);
         let paragraphs = vertical_splitter.split(add_margins(term_size));
@@ -177,7 +180,6 @@ mod problem_menu_utils {
     use tui::layout::Constraint;
     use tui::layout::Direction;
     use tui::layout::Layout;
-    use tui::layout::Margin;
     use tui::layout::Rect;
 
     pub struct ProblemLayout {
@@ -193,8 +195,8 @@ mod problem_menu_utils {
         Constraint::Percentage(5),
         Constraint::Percentage(30),
         Constraint::Percentage(30),
-        Constraint::Percentage(10),
         Constraint::Percentage(25),
+        Constraint::Percentage(10),
     ];
 
     pub fn layout_for_problem(term_size: Rect) -> ProblemLayout {
@@ -211,8 +213,20 @@ mod problem_menu_utils {
             problem_name: paragraphs[0],
             problem_statement: paragraphs[1],
             problem_example: paragraphs[2],
-            last_run_data: paragraphs[3],
-            commands: paragraphs[4],
+            commands: paragraphs[3],
+            last_run_data: paragraphs[4],
         }
+    }
+}
+
+mod helpers {
+    use tui::text::Span;
+use tui::widgets::Block;
+    use tui::style::Style;
+
+    pub fn block_with_title<'a>(title: String) -> Block<'a> {
+        Block::default()
+            .borders(tui::widgets::Borders::ALL)
+            .title(Span::styled(title, Style::default().add_modifier(tui::style::Modifier::BOLD)))        
     }
 }

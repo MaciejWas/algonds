@@ -9,7 +9,6 @@ use std::rc::Rc;
 use tui::style::Style;
 use tui::text::Span;
 use tui::text::Spans;
-use tui::widgets::Block;
 use tui::widgets::Paragraph;
 use tui::widgets::Wrap;
 
@@ -59,12 +58,6 @@ impl From<&ModelRef> for View {
 }
 
 impl View {
-    pub fn block_with_title<'a>(&self, title: String) -> Block<'a> {
-        Block::default()
-            .borders(tui::widgets::Borders::ALL)
-            .title(title)
-            .title_style(Style::default().add_modifier(tui::style::Modifier::BOLD))
-    }
     pub fn get_help(&self) -> Paragraph {
         let spans = vec![
             Spans::from(Self::bold("General".to_string())),
@@ -222,7 +215,6 @@ impl View {
 #[derive(Debug, Clone, Copy)]
 pub enum Menu {
     Select,
-    Update,
     Solve,
     Help,
 }

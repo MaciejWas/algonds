@@ -18,7 +18,6 @@ pub type ModelRef = Rc<Model>;
 pub struct AppState {
     pub view: Rc<View>,
     pub controller: Controller,
-    pub settings: Settings,
 }
 
 impl From<AppArgs> for AppState {
@@ -26,17 +25,16 @@ impl From<AppArgs> for AppState {
         let settings = args
             .settings
             .as_ref()
-            .map(|path| settings::load(&path))
+            .map(|settings_path| Settings::load(&settings_path))
             .unwrap_or(Settings::from(&args));
 
-        let model: ModelRef = Model::new_ref(settings.clone());
+        let model: ModelRef = Model::new_ref(settings);
         let controller = Controller::from(&model);
         let view = View::from(&model);
 
         Self {
             view: Rc::new(view),
             controller: controller,
-            settings: settings,
         }
     }
 }

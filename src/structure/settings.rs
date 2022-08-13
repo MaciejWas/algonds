@@ -45,24 +45,28 @@ impl From<&AppArgs> for Settings {
     }
 }
 
-pub fn load(path: &String) -> Settings {
-    if is_web_link(path) {
-        load_from_web(path)
-    } else {
-        load_from_file(path)
+impl Settings {
+
+    pub fn load(path: &String) -> Settings {
+        if is_web_link(path) {
+            Self::load_from_web(path)
+        } else {
+            Self::load_from_file(path)
+        }
     }
+
+    fn load_from_web(link: &String) -> Settings {
+        let response = minreq::get(link).send().unwrap();
+        let serialized = response.as_str().unwrap();
+        serde_yaml::from_str(serialized).unwrap()
+    }
+
+    fn load_from_file(path: &String) -> Settings {
+        todo!()
+    }
+
 }
 
 fn is_web_link(text: &String) -> bool {
     text.starts_with("http")
-}
-
-fn load_from_web(link: &String) -> Settings {
-    let response = minreq::get(link).send().unwrap();
-    let serialized = response.as_str().unwrap();
-    serde_yaml::from_str(serialized).unwrap()
-}
-
-fn load_from_file(path: &String) -> Settings {
-    todo!()
 }

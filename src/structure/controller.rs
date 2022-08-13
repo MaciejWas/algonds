@@ -1,7 +1,7 @@
 use crate::structure::{
     InputField, 
     InputField::*, 
-    controller::EventResult::*, 
+    controller::AfterEvent::*, 
     view::Menu, 
     ModelRef
 };
@@ -9,22 +9,29 @@ use crossterm::event::{Event, KeyCode};
 use crate::event::KeyEvent;
 use std::rc::Rc;
 
-pub enum EventResult {
+#[derive(Eq, PartialEq, Debug)]
+pub enum AfterEvent {
     Quit,
     DoRefresh,
     NoRefresh,
 }
-impl EventResult {
-    pub fn is_quit(&self) -> bool {
-        if let Quit = self {
-            true
-        } else {
-            false
+
+impl AfterEvent {
+    pub fn and(self, other: AfterEvent) -> Self {
+        match (self, other) {
+            (Quit, _) => Quit,
+            (DoRefresh, Quit) => Quit,
+            (DoRefresh, _) => DoRefresh,
+            (NoRefresh, other) => other
         }
+    }
+
+    pub fn is_quit(&self) -> bool {
+        self.eq(&Self::Quit)
     }
 }
 
-impl Default for EventResult {
+impl Default for AfterEvent {
     fn default() -> Self {
         DoRefresh
     }
@@ -43,7 +50,7 @@ impl From<&ModelRef> for Controller {
 }
 
 impl Controller {
-    fn next_problem(&self) -> EventResult {
+    fn next_problem(&self) -> AfterEvent {
         let curr_id = self.model.curr_prob_id.get();
         if curr_id < self.model.total_problems() - 1 {
             self.model.curr_prob_id.set(curr_id + 1);
@@ -52,7 +59,7 @@ impl Controller {
         return NoRefresh;
     }
 
-    fn prev_problem(&self) -> EventResult {
+    fn prev_problem(&self) -> AfterEvent {
         let curr_id = self.model.curr_prob_id.get();
         if curr_id > 0 {
             self.model.curr_prob_id.set(curr_id - 1);
@@ -61,7 +68,8 @@ impl Controller {
         return NoRefresh;
     }
 
-    fn universal_actions(&self, key: KeyEvent) -> EventResult {
+    fn universal_actions(&self, key: KeyEvent) -> AfterEvent {
+        println!("jiojoi");
         if let KeyCode::Char('q') = key.code {
             return Quit;
         }
@@ -78,7 +86,7 @@ impl Controller {
         NoRefresh
     }
 
-    fn handle_select_menu(&self, key: KeyEvent) -> EventResult {
+    fn handle_select_menu(&self, key: KeyEvent) -> AfterEvent {
         match key.code {
             KeyCode::Char('j') => self.next_problem(),
             KeyCode::Char('k') => self.prev_problem(),
@@ -87,11 +95,11 @@ impl Controller {
         }
     }
 
-    fn handle_help_menu(&self) -> EventResult {
+    fn handle_help_menu(&self) -> AfterEvent {
         self.change_menu(Menu::Select)
     }
 
-    fn handle_input(&self, key: KeyEvent) -> EventResult{
+    fn handle_input(&self, key: KeyEvent) -> AfterEvent{
         if let KeyCode::Char(c) = key.code {
             self.model.add_to_input(c);
         }
@@ -114,12 +122,12 @@ impl Controller {
         DoRefresh
     }
 
-    fn edit(&self, field: InputField) -> EventResult {
+    fn edit(&self, field: InputField) -> AfterEvent {
         self.model.direct_input_to(field);
         DoRefresh
     }
 
-    fn handle_solve_menu(&self, key: KeyEvent) -> EventResult {
+    fn handle_solve_menu(&self, key: KeyEvent) -> AfterEvent {
         if self.model.is_in_input_mode() {
             return self.handle_input(key);
         }
@@ -132,7 +140,11 @@ impl Controller {
         }
     }
 
-    pub fn react_to_event(&self, event: Event) -> EventResult {
+    pub fn react_to_event(&self, event: Event) -> AfterEvent {
+        if let Event::Resize(_, _) = event {
+            return DoRefresh
+        }
+
         if let Event::Key(key) = event {
             return match self.model.menu.get() {
                 Menu::Help => self.handle_help_menu(),
@@ -144,7 +156,7 @@ impl Controller {
         return NoRefresh;
     }
 
-    fn change_menu(&self, new_menu: Menu) -> EventResult {
+    fn change_menu(&self, new_menu: Menu) -> AfterEvent {
         self.model.menu.set(new_menu);
         DoRefresh
     }

@@ -22,7 +22,7 @@ impl Model {
         Rc::new(Model {
             db: Model::load(&settings.db_path),
             input: RefCell::default(),
-            settings: RefCell::new(settings),
+            settings: RefCell::new(settings.clone()),
             menu: Cell::default(),
             curr_prob_id: Cell::default(),
             directing_input_to: Cell::new(None)
@@ -178,21 +178,7 @@ impl RemoteRunner {
     pub fn run(mut self) {
         loop {
             self.recv();
-            if let Some(reqw) = self.last_run_reqest.clone() {
-                match reqw {
-                    RunRequest::PleaseStop => continue,
-                    RunRequest::PleaseRun {examples, compile_script, run_script } => {
-                        for (i, ex) in examples.into_iter().enumerate() {
-                            if self.should_stop() {
-                                break
-                            }
-
-                            let result = self.run_example(ex);
-                            self.send_result(result, i);
-                        }
-                    }
-                }
-            }
+            self.run_next_example();
         }    
     }
 
@@ -200,7 +186,7 @@ impl RemoteRunner {
         todo!()
     }
 
-    fn run_example(&self, ex: Example) -> ExampleStatus{
+    fn run_next_example(&self) -> ExampleStatus {
         todo!()
     }
 
@@ -211,12 +197,15 @@ impl RemoteRunner {
     fn recv(&mut self) {
         match self.incoming.recv_timeout(std::time::Duration::from_secs(1)) {
             Ok(request) => match request {
-                RunRequest::PleaseRun { ..} => {
-                    self.last_run_reqest = Some(request)
-                },
-                RunRequest::PleaseStop => self.last_run_reqest = None,
+                RunRequest::PleaseRun { .. } => self.last_run_reqest = Some(request),
+                RunRequest::PleaseStop       => self.reset()
             }
             Err(_) => panic!("this should never happen!"),
         }
-    } 
+    }
+
+    fn reset(&mut self) {
+        self.last_run_reqest = None;
+        self.running = 0;
+    }
 }

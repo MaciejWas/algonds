@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use crate::structure::controller::EventResult;
+use crate::structure::controller::AfterEvent;
 use clap;
 use clap::Parser;
 use crossterm::{
@@ -19,6 +19,7 @@ use tui::{
 mod arguments;
 mod interface;
 mod structure;
+mod complexity;
 
 use arguments::AppArgs;
 use structure::AppState;
@@ -49,12 +50,14 @@ fn main() {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Result<()> {
-    let mut res: EventResult = EventResult::DoRefresh;
+    let mut res = AfterEvent::DoRefresh;
     while !res.is_quit() {
-        if let EventResult::DoRefresh = res {
+        if let AfterEvent::DoRefresh = res {
             app.render(terminal);
         }
-        res = app.react_to_event(event::read()?);
+        res = res.and(app.react_to_event(event::read()?))
+                 .and(app.react_to_code_runner());
+
         app.update();
     }
     Ok(())
@@ -70,7 +73,7 @@ mod tests {
 
     #[bench]
     fn bench_table(b: &mut Bencher) {
-        let mut model = Model::new_ref(Settings::default());
+        let model = Model::new_ref(Settings::default());
         let view = View::from(&model);
 
         b.iter(|| {
