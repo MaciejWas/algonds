@@ -1,7 +1,10 @@
+use crate::structure::ExampleStatus::Error;
 use crate::structure::model::RunRequest::PleaseRun;
 use crate::structure::common::*;
 use crate::structure::view::Menu;
 use crate::structure::Settings;
+use std::sync::mpsc;
+use std::thread;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -126,86 +129,5 @@ impl Model {
 
     pub fn finish_input(&self) {
         self.directing_input_to.set(None);
-    }
-}
-
-#[derive(Clone)]
-enum RunRequest {
-    PleaseRun {
-        compile_script: String,
-        run_script: String,
-        examples: Vec<Example>
-    },
-    PleaseStop
-}
-
-struct RunResponse {
-    id: usize,
-    result: ExampleStatus
-}
-
-use std::sync::mpsc;
-use std::thread;
-
-struct CodeRunner {
-    incoming: mpsc::Receiver<RunResponse>,
-    outgoing:  mpsc::Sender<RunRequest>
-} impl CodeRunner {
-    pub fn new() -> Self {
-        let (to_main, from_runner) = mpsc::channel();
-        let (to_runner, from_main) = mpsc::channel();
-
-        thread::spawn(move || {
-            RemoteRunner::new(from_main, to_main).run();
-        });
-
-        Self { incoming: from_runner, outgoing: to_runner }
-    }
-}
-
-struct RemoteRunner {
-    incoming: mpsc::Receiver<RunRequest>,
-    outgoing: mpsc::Sender<RunResponse>,
-    last_run_reqest: Option<RunRequest>,
-    running: usize,
-}
-
-impl RemoteRunner {
-    pub fn new(incoming: mpsc::Receiver<RunRequest>, outgoing: mpsc::Sender<RunResponse>) -> Self {
-        Self { incoming, outgoing, last_run_reqest: None, running: 0 }
-    }
-
-    pub fn run(mut self) {
-        loop {
-            self.recv();
-            self.run_next_example();
-        }    
-    }
-
-    fn should_stop(&self) -> bool {
-        todo!()
-    }
-
-    fn run_next_example(&self) -> ExampleStatus {
-        todo!()
-    }
-
-    fn send_result(&self, result: ExampleStatus, example_id: usize) {
-        todo!()
-    }
-
-    fn recv(&mut self) {
-        match self.incoming.recv_timeout(std::time::Duration::from_secs(1)) {
-            Ok(request) => match request {
-                RunRequest::PleaseRun { .. } => self.last_run_reqest = Some(request),
-                RunRequest::PleaseStop       => self.reset()
-            }
-            Err(_) => panic!("this should never happen!"),
-        }
-    }
-
-    fn reset(&mut self) {
-        self.last_run_reqest = None;
-        self.running = 0;
     }
 }

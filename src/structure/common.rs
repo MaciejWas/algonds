@@ -32,6 +32,7 @@ pub enum ExampleStatus {
     Fail,
     Running,
     NotRun,
+    Error(String)
 }
 
 impl Default for ExampleStatus {
@@ -60,6 +61,24 @@ pub enum AdditionalData {
     RunCommand(String),
     RunningBar(u8),
     None,
+}
+
+#[derive(Clone)]
+pub enum RunRequest {
+    PleaseRun(RunDetails),
+    PleaseStop
+}
+
+pub struct RunResponse {
+    id: usize,
+    result: ExampleStatus
+}
+
+#[derive(Clone)]
+pub struct RunDetails {
+    pub compile_script: String,
+    pub run_script: String,
+    pub examples: Vec<Example>
 }
 
 impl<'a> Into<Paragraph<'a>> for AdditionalData {   

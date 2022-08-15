@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 mod functions;
 mod verify;
 

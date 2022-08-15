@@ -8,6 +8,7 @@ pub mod controller;
 pub mod model;
 pub mod settings;
 pub mod view;
+mod runner;
 
 use common::*;
 use model::Model;

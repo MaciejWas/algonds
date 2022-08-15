@@ -69,7 +69,6 @@ impl Controller {
     }
 
     fn universal_actions(&self, key: KeyEvent) -> AfterEvent {
-        println!("jiojoi");
         if let KeyCode::Char('q') = key.code {
             return Quit;
         }
