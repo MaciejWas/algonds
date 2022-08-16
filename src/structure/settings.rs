@@ -29,20 +29,20 @@ impl From<&AppArgs> for Settings {
         args.db_path
             .as_ref()
             .map(|path| settings.db_path = path.clone());
-        args.compilation_step.as_ref()
+        args.compilation_step
+            .as_ref()
             .map(|txt| settings.compilation_step = txt.clone());
-        args.run_step.as_ref()
+        args.run_step
+            .as_ref()
             .map(|txt| settings.run_step = txt.clone());
 
         settings.pretty = !args.disable_unicode;
-
 
         settings
     }
 }
 
 impl Settings {
-
     pub fn load(path: &String) -> Settings {
         if is_web_link(path) {
             Self::load_from_web(path)
@@ -60,7 +60,6 @@ impl Settings {
     fn load_from_file(path: &String) -> Settings {
         todo!()
     }
-
 }
 
 fn is_web_link(text: &String) -> bool {

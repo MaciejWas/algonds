@@ -17,9 +17,9 @@ use tui::{
 };
 
 mod arguments;
+mod complexity;
 mod interface;
 mod structure;
-mod complexity;
 
 use arguments::AppArgs;
 use structure::AppState;
@@ -55,8 +55,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Res
         if let AfterEvent::DoRefresh = res {
             app.render(terminal);
         }
-        res = res.and(app.react_to_event(event::read()?))
-                 .and(app.react_to_code_runner());
+        res = res
+            .and(app.react_to_event(event::read()?))
+            .and(app.react_to_code_runner());
 
         app.update();
     }
@@ -69,7 +70,7 @@ mod tests {
     use crate::structure::model::Model;
     use crate::structure::settings::Settings;
     use crate::structure::view::View;
-    use test::{Bencher};
+    use test::Bencher;
 
     #[bench]
     fn bench_table(b: &mut Bencher) {

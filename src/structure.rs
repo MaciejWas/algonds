@@ -6,9 +6,9 @@ use std::rc::Rc;
 pub mod common;
 pub mod controller;
 pub mod model;
+mod runner;
 pub mod settings;
 pub mod view;
-mod runner;
 
 use common::*;
 use model::Model;

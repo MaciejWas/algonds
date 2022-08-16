@@ -1,11 +1,14 @@
 use crate::structure::controller::AfterEvent;
-use tui::layout::Margin;
-use tui::layout::Rect;
 use crate::structure::view::Menu;
 use crossterm::event::Event;
 use std::iter::zip;
-use tui::widgets::Paragraph;
-use tui::{backend::Backend, Terminal};
+use tui::{
+    backend::{Backend},
+    layout::{Constraint, Layout, Margin, Rect},
+    style::{Color, Modifier, Style},
+    widgets::{Paragraph, Block, Borders, Cell, Row, Table, TableState},
+    Frame, Terminal,
+};
 
 use crate::structure::AppState;
 
@@ -28,7 +31,10 @@ impl AppState {
             frame.render_widget(helpers::block_with_title("Help".to_string()), outer_window);
             frame.render_widget(help_text, inner_window);
             if inner_window.height < 14 {
-                frame.render_widget(Paragraph::new("Window is too small to show all help!".to_string()), select_menu_utils::get_term_footnote(term_size))
+                frame.render_widget(
+                    Paragraph::new("Window is too small to show all help!".to_string()),
+                    select_menu_utils::get_term_footnote(term_size),
+                )
             }
         })
         .unwrap();
@@ -41,18 +47,15 @@ impl AppState {
         let (name, statement, example) = self.view.detailed_problem();
         let bottom_bar_data = self.view.additional_data();
         let current_commands = self.view.current_commands();
-            
+        let window_block = helpers::block_with_title("Solving".to_string());
+
         term.draw(|frame| {
-            frame.render_widget(
-                helpers::block_with_title("Solving".to_string()),
-                layout.window,
-            );
+            frame.render_widget(window_block, layout.window);
             frame.render_widget(name, layout.problem_name);
             frame.render_widget(statement, layout.problem_statement);
             frame.render_widget(example, layout.problem_example);
             frame.render_widget(bottom_bar_data, layout.last_run_data);
             frame.render_widget(current_commands, layout.commands);
-
         })
         .unwrap();
     }
@@ -97,10 +100,9 @@ impl AppState {
     }
 
     pub fn react_to_code_runner(&mut self) -> AfterEvent {
-        AfterEvent::NoRefresh// todo: Impl;
+        AfterEvent::NoRefresh // todo: Impl;
     }
 }
-
 
 pub fn add_margins(term_size: Rect) -> Rect {
     term_size.inner(&Margin {
@@ -112,7 +114,7 @@ pub fn add_margins(term_size: Rect) -> Rect {
 mod select_menu_utils {
     use super::add_margins;
     use tui::layout::{Constraint, Direction, Layout, Rect};
-    
+
     const SPLIT_60_40: [Constraint; 2] = [Constraint::Percentage(60), Constraint::Percentage(40)];
 
     pub fn get_term_footnote(term: Rect) -> Rect {
@@ -141,11 +143,11 @@ mod select_menu_utils {
         rows
     }
 
-    const SPLIT_10_50_40: [Constraint; 3] =  [
+    const SPLIT_10_50_40: [Constraint; 3] = [
         Constraint::Percentage(10),
         Constraint::Percentage(50),
         Constraint::Percentage(40),
-    ];      
+    ];
 
     fn do_vertical_split_for_select_menu(term_size: Rect) -> (Rect, Rect, Rect) {
         let vertical_splitter = Layout::default()
@@ -188,15 +190,15 @@ mod problem_menu_utils {
         pub problem_statement: Rect,
         pub problem_example: Rect,
         pub last_run_data: Rect,
-        pub commands: Rect
+        pub commands: Rect,
     }
 
     const SPLIT: [Constraint; 5] = [
-        Constraint::Percentage(5),
+        Constraint::Percentage(8),
         Constraint::Percentage(30),
-        Constraint::Percentage(30),
+        Constraint::Percentage(15),
         Constraint::Percentage(25),
-        Constraint::Percentage(10),
+        Constraint::Percentage(22),
     ];
 
     pub fn layout_for_problem(term_size: Rect) -> ProblemLayout {
@@ -220,13 +222,16 @@ mod problem_menu_utils {
 }
 
 mod helpers {
-    use tui::text::Span;
-use tui::widgets::Block;
     use tui::style::Style;
+    use tui::text::Span;
+    use tui::widgets::Block;
 
     pub fn block_with_title<'a>(title: String) -> Block<'a> {
         Block::default()
             .borders(tui::widgets::Borders::ALL)
-            .title(Span::styled(title, Style::default().add_modifier(tui::style::Modifier::BOLD)))        
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(tui::style::Modifier::BOLD),
+            ))
     }
 }

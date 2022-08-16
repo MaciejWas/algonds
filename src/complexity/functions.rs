@@ -40,7 +40,7 @@ const N_LOG_N_TABLE: [(u32, u32); 40] = [
     (370, 2960),
     (380, 3040),
     (390, 3120),
-    (400, 3200)
+    (400, 3200),
 ];
 
 pub trait Function {
@@ -52,18 +52,18 @@ pub trait Function {
         let mut corrected_y = y.clone();
         while corrected_y <= self.max_y() {
             if let Some(x) = self.inverse(corrected_y) {
-                return x
+                return x;
             };
             corrected_y += 1;
-        }  
+        }
         panic!("Inverse not found :(")
     }
 }
 
-
 pub struct NLogN {
-    map: HashMap<u32, u32>
-} impl NLogN {
+    map: HashMap<u32, u32>,
+}
+impl NLogN {
     fn init() -> Self {
         let invert = |(x, y)| (y, x);
         let map: HashMap<u32, u32> = N_LOG_N_TABLE.clone().into_iter().map(invert).collect();
@@ -71,28 +71,30 @@ pub struct NLogN {
     }
 }
 
-impl Function for NLogN {    
-    fn inverse(&self, y: u32) -> Option<u32> { 
+impl Function for NLogN {
+    fn inverse(&self, y: u32) -> Option<u32> {
         self.map.get(&y).cloned()
     }
 
-    fn max_y(&self) -> u32 { N_LOG_N_TABLE.len() as u32 }
+    fn max_y(&self) -> u32 {
+        N_LOG_N_TABLE.len() as u32
+    }
 }
-
 
 pub struct N;
 
-impl Function for N {    
-
-    fn inverse(&self, y: u32) -> Option<u32> { 
+impl Function for N {
+    fn inverse(&self, y: u32) -> Option<u32> {
         Some(y)
     }
 
-    fn max_y(&self) -> u32 { u32::MAX }
+    fn max_y(&self) -> u32 {
+        u32::MAX
+    }
 }
 
 impl From<String> for Box<dyn Function> {
-    fn from(x: String) -> Box<dyn Function> { 
+    fn from(x: String) -> Box<dyn Function> {
         if x.eq("nlogn") {
             return Box::new(NLogN::init());
         }
@@ -102,6 +104,5 @@ impl From<String> for Box<dyn Function> {
         }
 
         panic!()
-    } 
+    }
 }
-

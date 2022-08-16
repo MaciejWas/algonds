@@ -1,12 +1,8 @@
+use crate::event::KeyEvent;
 use crate::structure::{
-    InputField, 
-    InputField::*, 
-    controller::AfterEvent::*, 
-    view::Menu, 
-    ModelRef
+    controller::AfterEvent::*, view::Menu, InputField, InputField::*, ModelRef,
 };
 use crossterm::event::{Event, KeyCode};
-use crate::event::KeyEvent;
 use std::rc::Rc;
 
 #[derive(Eq, PartialEq, Debug)]
@@ -22,7 +18,7 @@ impl AfterEvent {
             (Quit, _) => Quit,
             (DoRefresh, Quit) => Quit,
             (DoRefresh, _) => DoRefresh,
-            (NoRefresh, other) => other
+            (NoRefresh, other) => other,
         }
     }
 
@@ -98,7 +94,7 @@ impl Controller {
         self.change_menu(Menu::Select)
     }
 
-    fn handle_input(&self, key: KeyEvent) -> AfterEvent{
+    fn handle_input(&self, key: KeyEvent) -> AfterEvent {
         if let KeyCode::Char(c) = key.code {
             self.model.add_to_input(c);
         }
@@ -111,13 +107,13 @@ impl Controller {
             self.model.save_input();
             self.model.wipe_input();
             self.model.finish_input();
-            return DoRefresh
+            return DoRefresh;
         }
 
         if let KeyCode::Char('c') = key.code && key.modifiers == crossterm::event::KeyModifiers::CONTROL {
             return Quit
         }
-        
+
         DoRefresh
     }
 
@@ -141,7 +137,7 @@ impl Controller {
 
     pub fn react_to_event(&self, event: Event) -> AfterEvent {
         if let Event::Resize(_, _) = event {
-            return DoRefresh
+            return DoRefresh;
         }
 
         if let Event::Key(key) = event {

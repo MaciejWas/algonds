@@ -203,12 +203,15 @@ impl View {
         let run_step = settings.run_step.clone();
         Paragraph::new(vec![
             Spans::from("".to_string()), // New line
-            Spans::from(
-                vec![Self::bold("Compilation step: ".to_string()), Span::from(compilation_step)]), 
-            Spans::from(
-                vec![Self::bold("Run step:         ".to_string()), Span::from(run_step)])
+            Spans::from(vec![
+                Self::bold("Compilation step: ".to_string()),
+                Span::from(compilation_step),
+            ]),
+            Spans::from(vec![
+                Self::bold("Run step:         ".to_string()),
+                Span::from(run_step),
+            ]),
         ])
-
     }
 }
 
@@ -220,6 +223,8 @@ pub enum Menu {
 }
 
 impl Default for Menu {
-    fn default() -> Self { Self::Select }
+    fn default() -> Self {
+        Self::Select
+    }
 }
 // test tests::bench_pow ... bench:      13,345 ns/iter (+/- 1,405)

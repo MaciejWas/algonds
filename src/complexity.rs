@@ -1,8 +1,4 @@
 mod functions;
 mod verify;
 
-pub use functions::{
-    Function,
-    NLogN,
-    N,
-};
+pub use functions::{Function, NLogN, N};

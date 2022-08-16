@@ -1,10 +1,7 @@
-use crate::structure::ExampleStatus::Error;
-use crate::structure::model::RunRequest::PleaseRun;
 use crate::structure::common::*;
+use crate::structure::runner::CodeRunner;
 use crate::structure::view::Menu;
 use crate::structure::Settings;
-use std::sync::mpsc;
-use std::thread;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -14,6 +11,7 @@ pub type Db = Vec<Rc<Problem>>;
 pub struct Model {
     db: Db,
     directing_input_to: Cell<Option<InputField>>,
+    code_runner: CodeRunner,
     pub input: RefCell<String>,
     pub settings: RefCell<Settings>,
     pub menu: Cell<Menu>,
@@ -24,12 +22,32 @@ impl Model {
     pub fn new_ref(settings: Settings) -> Rc<Self> {
         Rc::new(Model {
             db: Model::load(&settings.db_path),
+            code_runner: CodeRunner::default(),
             input: RefCell::default(),
             settings: RefCell::new(settings.clone()),
             menu: Cell::default(),
             curr_prob_id: Cell::default(),
-            directing_input_to: Cell::new(None)
+            directing_input_to: Cell::new(None),
         })
+    }
+
+    pub fn run_test_cases(&self) -> Result<(), std::sync::mpsc::SendError<RunRequest>> {
+        let compile_script = self.settings.borrow().compilation_step.clone();
+        let run_script = self.settings.borrow().run_step.clone();
+
+        self.code_runner.please_run(
+            self.current_problem().examples.clone(),
+            compile_script,
+            run_script,
+        )
+    }
+
+    pub fn stop_run_test_cases(&self) -> Result<(), std::sync::mpsc::SendError<RunRequest>> {
+        self.code_runner.please_stop()
+    }
+
+    pub fn get_run_updates(&self) -> Vec<RunResponse> {
+        self.code_runner.get_updates()
     }
 
     pub fn direct_input_to(&self, field: InputField) {
@@ -39,7 +57,7 @@ impl Model {
         match field {
             InputField::CompileCommand => *input = self.settings.borrow().compilation_step.clone(),
             InputField::RunCommand => *input = self.settings.borrow().run_step.clone(),
-        }        
+        }
     }
 
     pub fn current_problem<'a>(&'a self) -> &'a Problem {
@@ -107,9 +125,11 @@ impl Model {
     pub fn additional_data(&self) -> AdditionalData {
         if let Some(field) = self.directing_input_to.get() {
             return match field {
-                InputField::CompileCommand => AdditionalData::CompileCommand(self.input.borrow().clone()),
+                InputField::CompileCommand => {
+                    AdditionalData::CompileCommand(self.input.borrow().clone())
+                }
                 InputField::RunCommand => AdditionalData::RunCommand(self.input.borrow().clone()),
-            }
+            };
         }
 
         AdditionalData::None
@@ -122,7 +142,7 @@ impl Model {
             Some(field) => match field {
                 InputField::CompileCommand => settings.compilation_step = finished_input,
                 InputField::RunCommand => settings.run_step = finished_input,
-            }
+            },
             None => {}
         }
     }

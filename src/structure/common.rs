@@ -1,9 +1,9 @@
-use tui::text::Spans;
-use tui::widgets::Paragraph;
 use serde::{Deserialize, Serialize};
 use tui::style::Color;
 use tui::style::Style;
 use tui::text::Span;
+use tui::text::Spans;
+use tui::widgets::Paragraph;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Difficulty {
@@ -30,13 +30,36 @@ pub struct Example {
 pub enum ExampleStatus {
     Pass,
     Fail,
+    Cancelled,
     Running,
     NotRun,
-    Error(String)
+    Error(String),
+}
+
+impl<'a> Into<Span<'a>> for ExampleStatus {
+    fn into(self) -> Span<'a> {
+        let text = match &self {
+            Self::Pass => "🗹Pass",
+            Self::Fail => "🗷Fail",
+            Self::Running => "⌛Running",
+            Self::Cancelled => "⚠Cancelled",
+            Self::NotRun => "🯄NotRun",
+            Self::Error(_) => "‼Error",
+        };
+        let style = match &self {
+            Self::Pass => Style::default().fg(Color::Green),
+            Self::Fail | Self::Error(_) => Style::default().fg(Color::Red),
+            Self::Cancelled | Self::Running => Style::default().fg(Color::Yellow),
+            Self::NotRun => Style::default().fg(Color::Gray),
+        };
+        Span::styled(text, style)
+    }
 }
 
 impl Default for ExampleStatus {
-    fn default() -> Self { Self::NotRun }
+    fn default() -> Self {
+        Self::NotRun
+    }
 }
 
 impl From<&Difficulty> for Span<'_> {
@@ -49,7 +72,6 @@ impl From<&Difficulty> for Span<'_> {
     }
 }
 
-
 #[derive(Debug, Clone, Copy)]
 pub enum InputField {
     CompileCommand,
@@ -59,35 +81,39 @@ pub enum InputField {
 pub enum AdditionalData {
     CompileCommand(String),
     RunCommand(String),
-    RunningBar(u8),
     None,
 }
 
 #[derive(Clone)]
 pub enum RunRequest {
     PleaseRun(RunDetails),
-    PleaseStop
+    PleaseStop,
 }
 
 pub struct RunResponse {
-    id: usize,
-    result: ExampleStatus
+    pub id: usize,
+    pub result: ExampleStatus,
 }
 
 #[derive(Clone)]
 pub struct RunDetails {
     pub compile_script: String,
     pub run_script: String,
-    pub examples: Vec<Example>
+    pub examples: Vec<Example>,
 }
 
-impl<'a> Into<Paragraph<'a>> for AdditionalData {   
-    fn into(self) -> Paragraph<'a> { 
+impl<'a> Into<Paragraph<'a>> for AdditionalData {
+    fn into(self) -> Paragraph<'a> {
         match self {
-            Self::CompileCommand(command) => Paragraph::new(Spans::from("Edit compilation step: ".to_string() + &command + "▮")),
-            Self::RunCommand(command) => Paragraph::new(Spans::from("Edit run step: ".to_string() + &command + "▮")),
-            Self::RunningBar(u) => Paragraph::new(Spans::from("Running: ".to_string() + &u.to_string())),
-            Self::None => Paragraph::new(Spans::from("r - edit run script, c - edit compilation script, enter - run tests")),
+            Self::CompileCommand(command) => Paragraph::new(Spans::from(
+                "Edit compilation step: ".to_string() + &command + "▮",
+            )),
+            Self::RunCommand(command) => {
+                Paragraph::new(Spans::from("Edit run step: ".to_string() + &command + "▮"))
+            }
+            Self::None => Paragraph::new(Spans::from(
+                "r - edit run script, c - edit compilation script, enter - run tests",
+            )),
         }
     }
 }
