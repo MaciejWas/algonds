@@ -1,6 +1,6 @@
 use crate::event::KeyEvent;
 use crate::structure::{
-    controller::AfterEvent::*, view::Menu, InputField, InputField::*, ModelRef,
+    controller::AfterEvent::*, common::Menu, InputField, InputField::*, ModelRef,
 };
 use crossterm::event::{Event, KeyCode};
 use std::rc::Rc;
@@ -47,21 +47,13 @@ impl From<&ModelRef> for Controller {
 
 impl Controller {
     fn next_problem(&self) -> AfterEvent {
-        let curr_id = self.model.curr_prob_id.get();
-        if curr_id < self.model.total_problems() - 1 {
-            self.model.curr_prob_id.set(curr_id + 1);
-            return DoRefresh;
-        }
-        return NoRefresh;
+        self.model.select_next(true);
+        return DoRefresh;
     }
 
     fn prev_problem(&self) -> AfterEvent {
-        let curr_id = self.model.curr_prob_id.get();
-        if curr_id > 0 {
-            self.model.curr_prob_id.set(curr_id - 1);
-            return DoRefresh;
-        }
-        return NoRefresh;
+        self.model.select_next(false);
+        return DoRefresh;
     }
 
     fn universal_actions(&self, key: KeyEvent) -> AfterEvent {
@@ -84,6 +76,8 @@ impl Controller {
     fn handle_select_menu(&self, key: KeyEvent) -> AfterEvent {
         match key.code {
             KeyCode::Char('j') => self.next_problem(),
+            KeyCode::Up => self.prev_problem(),
+            KeyCode::Down => self.next_problem(),
             KeyCode::Char('k') => self.prev_problem(),
             KeyCode::Enter => self.change_menu(Menu::Solve),
             _ => self.universal_actions(key),
@@ -95,35 +89,24 @@ impl Controller {
     }
 
     fn handle_input(&self, key: KeyEvent) -> AfterEvent {
-        if let KeyCode::Char(c) = key.code {
-            self.model.add_to_input(c);
-        }
-
-        if let KeyCode::Backspace = key.code {
-            self.model.input.borrow_mut().pop();
-        }
-
-        if let KeyCode::Enter = key.code {
-            self.model.save_input();
-            self.model.wipe_input();
-            self.model.finish_input();
-            return DoRefresh;
-        }
-
-        if let KeyCode::Char('c') = key.code && key.modifiers == crossterm::event::KeyModifiers::CONTROL {
-            return Quit
-        }
+        let input_handler = &self.model.input_handler;
+        match key.code {
+            KeyCode::Char(c) => input_handler.add(c),
+            KeyCode::Backspace => input_handler.pop(),
+            KeyCode::Enter => self.model.finish_edit(),
+            _ => return NoRefresh
+        };
 
         DoRefresh
     }
 
     fn edit(&self, field: InputField) -> AfterEvent {
-        self.model.direct_input_to(field);
+        self.model.input_handler.edit_field(field);
         DoRefresh
     }
 
     fn handle_solve_menu(&self, key: KeyEvent) -> AfterEvent {
-        if self.model.is_in_input_mode() {
+        if self.model.input_handler.is_in_input_mode() {
             return self.handle_input(key);
         }
 

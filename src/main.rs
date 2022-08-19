@@ -1,6 +1,8 @@
 #![feature(test)]
+use crate::structure::ui::UIElement;
 extern crate test;
 
+use test::Bencher;
 use crate::structure::controller::AfterEvent;
 use clap;
 use clap::Parser;
@@ -53,44 +55,35 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Res
     let mut res = AfterEvent::DoRefresh;
     while !res.is_quit() {
         if let AfterEvent::DoRefresh = res {
-            app.render(terminal);
+            terminal.draw(|frame| app.render(frame))?;
         }
-        res = res
-            .and(app.react_to_event(event::read()?))
-            .and(app.react_to_code_runner());
 
-        app.update();
+        res = app.react_to_event(event::read()?);
     }
     Ok(())
 }
 
+
 #[cfg(test)]
-#[allow(soft_unstable)]
 mod tests {
-    use crate::structure::model::Model;
-    use crate::structure::settings::Settings;
-    use crate::structure::view::View;
-    use test::Bencher;
+    use crate::structure::ui::UIElement;
+    use crate::AppState;
+    use test::{Bencher, black_box};
 
     #[bench]
-    fn bench_table(b: &mut Bencher) {
-        let model = Model::new_ref(Settings::default());
-        let view = View::from(&model);
+    fn setup_available_problems(b: &mut Bencher) {
+        let app = AppState::default();
 
         b.iter(|| {
-            // Inner closure, the actual test
-            view.get_problems_to_select(30);
-        });
+            crate::structure::ui::AvailableProblems::setup(&app.view)
+        })
     }
 
     #[bench]
-    fn bench_detailed_problem(b: &mut Bencher) {
-        let model = Model::new_ref(Settings::default());
-        let view = View::from(&model);
-
+    fn setup_problem_preview(b: &mut Bencher) {
+        let app = AppState::default();
         b.iter(|| {
-            // Inner closure, the actual test
-            view.detailed_problem();
-        });
+            crate::structure::ui::ProblemView::setup(&app.view)
+        })
     }
 }

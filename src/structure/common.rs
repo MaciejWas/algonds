@@ -5,6 +5,21 @@ use tui::text::Span;
 use tui::text::Spans;
 use tui::widgets::Paragraph;
 
+
+#[derive(Debug, Clone, Copy)]
+pub enum Menu {
+    Select,
+    Solve,
+    Help,
+}
+
+impl Default for Menu {
+    fn default() -> Self {
+        Self::Select
+    }
+}
+
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Difficulty {
     Easy,
@@ -12,7 +27,7 @@ pub enum Difficulty {
     Hard,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Problem {
     pub problem_name: String,
     pub problem_statement: String,
@@ -27,6 +42,7 @@ pub struct Example {
     pub output: String,
 }
 
+#[derive(Debug, Clone)]
 pub enum ExampleStatus {
     Pass,
     Fail,
