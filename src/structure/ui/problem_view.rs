@@ -13,7 +13,6 @@ use tui::{
 };
 use crate::structure::common::*;
 use crate::structure::View;
-use crate::structure::ui::MenuLayout;
 
 fn example<'a>(exmp: &Example) -> Paragraph<'a> {
     Paragraph::new(vec![

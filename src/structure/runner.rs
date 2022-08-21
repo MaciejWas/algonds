@@ -57,6 +57,7 @@ struct RunnableTestCase {
     process: Option<std::process::Child>,
     start_time: Option<std::time::Instant>,
 }
+
 impl RunnableTestCase {
     pub fn new(id: usize, command_template: String, arg: String, expected_stdout: String) -> Self {
         Self {
@@ -140,7 +141,7 @@ impl RunnableTestCase {
 impl Drop for RunnableTestCase {
     fn drop(&mut self) {
         if self.process.is_some() {
-            self.kill();
+            self.kill().unwrap();
         }
     }
 }
@@ -205,7 +206,8 @@ impl RemoteRunner {
 
     fn abort_curr_run(&mut self) {
         for test_case in &self.to_run {
-            self.notify_cancelled(test_case);
+            self.notify_cancelled(test_case)
+                .unwrap_or_else(|_| panic!("could not send notification duting abort curr run"));
         }
         self.to_run = VecDeque::new();
     }

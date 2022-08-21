@@ -15,7 +15,6 @@ use tui::{
 };
 use crate::structure::common::*;
 use crate::structure::View;
-use crate::structure::ui::MenuLayout;
 
 fn example<'a>(exmp: &Example) -> Paragraph<'a> {
     Paragraph::new(vec![
@@ -57,7 +56,6 @@ impl<'a> UIElement for TestCaseTable<'a> {
         let constraints = vec![Constraint::Length(10); 12];
 
         let test_case_data = Table::new(rows)
-            .block(Block::default().borders(Borders::ALL).title(bold("Test cases")))
             .column_spacing(3)
             .widths(&constraints);
 

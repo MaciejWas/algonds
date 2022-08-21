@@ -24,8 +24,13 @@ pub struct InputHandler {
         self.direction.get()
     }
 
-    pub fn edit_field(&self, field: InputField) {
-        self.direction.set(Some(field))
+    pub fn curr_input(&self) -> String {
+        self.raw_input.borrow().clone()
+    }
+
+    pub fn edit_field(&self, curr_value: String, field: InputField) {
+        self.direction.set(Some(field));
+        self.raw_input.replace(curr_value);
     }
 
     pub fn add(&self, c: char) {
@@ -46,27 +51,28 @@ pub struct InputHandler {
         self.direction.set(None);
         self.raw_input.replace(String::new())
     }
-}
-
-impl Default for InputHandler {
+} impl Default for InputHandler {
     fn default() -> Self { 
         Self { raw_input: RefCell::default(), direction: Cell::default() } 
     }
 }
 
 pub struct Model {
-    db: Db,
+    pub problem_data_kind: Cell<ProblemDataKind>,
     pub input_handler: InputHandler,
-    code_runner: CodeRunner,
     pub settings: RefCell<Settings>,
     pub menu: Cell<Menu>,
-    pub test_cases: RefCell<Vec<ExampleStatus>>,
-    pub list_state: RefCell<ListState>,
+    
+    db: Db,
+    code_runner: CodeRunner,
+    test_cases: RefCell<Vec<ExampleStatus>>,
+    list_state: RefCell<ListState>,
 }
 
 impl Model {
     pub fn new_ref(settings: Settings) -> Rc<Self> {
         Rc::new(Model {
+            problem_data_kind: Cell::default(),
             db: Model::load(&settings.db_path),
             code_runner: CodeRunner::default(),
             input_handler: InputHandler::default(),
@@ -75,6 +81,10 @@ impl Model {
             test_cases: RefCell::default(),
             list_state: RefCell::default()
         })
+    }
+
+    pub fn get_list_state(&self) -> RefCell<ListState> {
+        self.list_state.clone()
     }
 
     pub fn select_next(&self, up: bool) {
@@ -89,15 +99,13 @@ impl Model {
         self.list_state.borrow_mut().select(new_id);
     }
 
-    pub fn setup_problem(&self) {
-        let n_tests = self.current_problem().examples.len();
-        let mut test_cases = self.test_cases.borrow_mut();
-        *test_cases = vec![ExampleStatus::default(); n_tests];
+    pub fn edit_field(&self, field: InputField) {
+        let current_value = self.get_field(field);
+        self.input_handler.edit_field(current_value, field)
     }
 
-    pub fn teardown_curr_problem(&self) {
-        let mut test_cases = self.test_cases.borrow_mut();
-        *test_cases = Vec::new();
+    pub fn cancel_edit(&self) {
+        self.input_handler.finish();
     }
 
     pub fn run_test_cases(&self) -> Result<(), SendError<RunRequest>> {
@@ -137,6 +145,14 @@ impl Model {
             .collect()
     }
 
+    pub fn get_field(&self, field: InputField) -> String {
+        let settings = self.settings.borrow();
+        match field {
+            InputField::CompileCommand => settings.compilation_step.clone(),
+            InputField::RunCommand => settings.run_step.clone(),
+        }
+    }
+
     pub fn total_problems(&self) -> usize {
         self.db.len()
     }
@@ -167,14 +183,11 @@ impl Model {
         problems.into_iter().map(Rc::new).collect()
     }
 
-    pub fn add_to_input(&self, c: char) {
-        self.input_handler.add(c);
-    }
-
     pub fn finish_edit(&self) {
         let mut settings = self.settings.borrow_mut();
+        let field = self.input_handler.current_field();
         let finished_input = self.input_handler.finish();
-        match self.input_handler.current_field() {
+        match field {
             Some(field) => match field {
                 InputField::CompileCommand => settings.compilation_step = finished_input,
                 InputField::RunCommand => settings.run_step = finished_input,

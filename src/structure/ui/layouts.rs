@@ -2,7 +2,6 @@ use tui::layout::Layout;
 use tui::layout::Constraint;
 use tui::layout::Rect;
 use tui::layout::Direction;
-use crate::structure::common::*;
 
 mod help_menu;
 mod select_menu;
@@ -14,35 +13,10 @@ pub use select_menu::SelectScreenLayout;
 pub use solve_menu::ProblemScreenLayout;
 pub use problem_layout::ProblemLayout;
 
-#[derive(Clone, Copy)]
-pub enum MenuLayout {
-    Select(SelectScreenLayout),
-    Problem(ProblemScreenLayout),
-    Help(HelpScreenLayout),
-}
-
-impl MenuLayout {
-    pub fn new(menu: Menu, term_size: Rect) -> Self {
-        match menu {
-            Menu::Help => Self::Help(HelpScreenLayout::from(term_size)),
-            Menu::Select => Self::Select(SelectScreenLayout::from(term_size)),
-            Menu::Solve => Self::Problem(ProblemScreenLayout::from(term_size))
-        }
-    }
-}
-
 const SPLIT_HELP: [Constraint; 3] = [
     Constraint::Percentage(33),
     Constraint::Percentage(33),
     Constraint::Percentage(33),
-];
-
-
-const PROBLEM_SCREEN_SPLIT: [Constraint; 4] =  [
-    Constraint::Percentage(10),
-    Constraint::Percentage(30),
-    Constraint::Percentage(30),
-    Constraint::Percentage(30),
 ];
 
 const SELECT_PROBLEM_WINDOWS_CONSTRAINTS: [Constraint; 2] = [

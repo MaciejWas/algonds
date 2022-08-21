@@ -13,6 +13,19 @@ pub enum Menu {
     Help,
 }
 
+#[derive(Copy, Clone)]
+pub enum ProblemDataKind {
+    TestCases,
+    Commands,
+    LastFailedExample,
+}
+
+impl Default for ProblemDataKind {
+    fn default() -> Self {
+        Self::Commands
+    }
+}
+
 impl Default for Menu {
     fn default() -> Self {
         Self::Select
@@ -88,7 +101,7 @@ impl From<&Difficulty> for Span<'_> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputField {
     CompileCommand,
     RunCommand,

@@ -1,8 +1,7 @@
-use crate::structure::ui::ProblemView;
 use crate::structure::ui::ProblemLayout;
 use tui::layout::Rect;
 
-use super::{split_left_right, split_problem_preview, get_footnote, add_margin};
+use super::{split_left_right, get_footnote, add_margin};
 
 #[derive(Clone, Copy)]
 pub struct SelectScreenLayout {

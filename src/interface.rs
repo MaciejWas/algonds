@@ -2,18 +2,13 @@ use crate::structure::ui::SelectScreenLayout;
 use crate::structure::ui::ProblemScreenLayout;
 use crate::structure::ui::HelpScreenLayout;
 use crate::structure::ui;
-use crate::structure::ui::MenuLayout;
 use crate::structure::common::Menu;
 use crate::structure::controller::AfterEvent;
 use crate::structure::ui::UIElement;
 use crossterm::event::Event;
-use std::iter::zip;
 use tui::{
-    backend::{Backend},
-    layout::{Constraint, Layout, Margin, Rect},
-    style::{Color, Modifier, Style},
-    widgets::{Paragraph, Block, Borders, Cell, Row, Table, TableState},
-    Frame, Terminal,
+    backend::Backend,
+    Frame,
 };
 
 use crate::structure::AppState;

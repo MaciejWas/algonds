@@ -1,5 +1,4 @@
 use crate::structure::ui::SelectScreenLayout;
-use std::ops::DerefMut;
 use std::cell::RefCell;
 use crate::structure::ui::UIElement;
 use std::rc::Rc;
@@ -12,7 +11,6 @@ use tui::{
 };
 use crate::structure::common::*;
 use crate::structure::View;
-use crate::structure::ui::MenuLayout;
 
 pub struct AvailableProblems<'a> {
     items: Vec<ListItem<'a>>,

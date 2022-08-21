@@ -8,15 +8,19 @@ mod available_problems;
 mod problem_view;
 mod layouts;
 mod help;
-mod problem_data;
+mod test_case_table;
 mod full_problem;
+mod commands;
+mod last_test_case;
 
+pub use commands::CommandsView;
 pub use available_problems::AvailableProblems;
 pub use problem_view::ProblemView;
 pub use help::Help;
-pub use problem_data::ProblemData;
+pub use test_case_table::TestCaseTable;
 pub use layouts::*;
 pub use full_problem::FullProblem;
+pub use last_test_case::LastTestCaseView;
 
 pub trait UIElement {
     type ExpectedLayout;

@@ -2,20 +2,12 @@ use crate::structure::ui::HelpScreenLayout;
 use tui::widgets::Wrap;
 use tui::widgets::Paragraph;
 use crate::structure::ui::UIElement;
-use std::rc::Rc;
-use tui::layout::Rect;
 use tui::{
-    backend::{Backend, CrosstermBackend},
-    layout::{Constraint, Corner, Direction, Layout},
-    style::{Color, Modifier, Style},
+    backend::Backend,
     text::{Span, Spans},
-    widgets::{Block, Borders, List, ListItem, ListState},
-    Frame, Terminal,
+    Frame,
 };
-use crate::structure::common::*;
 use crate::structure::View;
-use crate::structure::ui::MenuLayout;
-
 
 
 fn bold<'a, T: Into<String>>(text: T) -> Span<'a> {
@@ -23,10 +15,6 @@ fn bold<'a, T: Into<String>>(text: T) -> Span<'a> {
         text.into(),
         tui::style::Style::default().add_modifier(tui::style::Modifier::BOLD),
     )
-}
-
-fn text<'a>(t: String) -> Span<'a> {
-    Span::from(t)
 }
 
 pub struct Help<'a> {
@@ -73,7 +61,7 @@ impl<'a> Help<'a> {
 impl<'a> UIElement for Help<'a> {
     type ExpectedLayout = HelpScreenLayout;
 
-    fn setup(view: &View) -> Self {
+    fn setup(_view: &View) -> Self {
         let general_help = Self::create_general_help();
         let select_help = Self::create_select_help();
         let solve_help = Self::create_solve_help();

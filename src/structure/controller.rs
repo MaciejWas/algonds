@@ -1,6 +1,6 @@
 use crate::event::KeyEvent;
 use crate::structure::{
-    controller::AfterEvent::*, common::Menu, InputField, InputField::*, ModelRef,
+    controller::AfterEvent::*, common::Menu, InputField, InputField::*, ModelRef, common::ProblemDataKind
 };
 use crossterm::event::{Event, KeyCode};
 use std::rc::Rc;
@@ -13,15 +13,6 @@ pub enum AfterEvent {
 }
 
 impl AfterEvent {
-    pub fn and(self, other: AfterEvent) -> Self {
-        match (self, other) {
-            (Quit, _) => Quit,
-            (DoRefresh, Quit) => Quit,
-            (DoRefresh, _) => DoRefresh,
-            (NoRefresh, other) => other,
-        }
-    }
-
     pub fn is_quit(&self) -> bool {
         self.eq(&Self::Quit)
     }
@@ -46,6 +37,21 @@ impl From<&ModelRef> for Controller {
 }
 
 impl Controller {
+    pub fn react_to_event(&self, event: Event) -> AfterEvent {
+        if let Event::Resize(_, _) = event {
+            return DoRefresh;
+        }
+
+        if let Event::Key(key) = event {
+            return match self.model.menu.get() {
+                Menu::Help => self.handle_help_menu(),
+                Menu::Select => self.handle_select_menu(key),
+                Menu::Solve => self.handle_solve_menu(key),
+            };
+        }
+        return NoRefresh;
+    }
+
     fn next_problem(&self) -> AfterEvent {
         self.model.select_next(true);
         return DoRefresh;
@@ -92,6 +98,7 @@ impl Controller {
         let input_handler = &self.model.input_handler;
         match key.code {
             KeyCode::Char(c) => input_handler.add(c),
+            KeyCode::Esc => self.model.cancel_edit(),
             KeyCode::Backspace => input_handler.pop(),
             KeyCode::Enter => self.model.finish_edit(),
             _ => return NoRefresh
@@ -101,7 +108,8 @@ impl Controller {
     }
 
     fn edit(&self, field: InputField) -> AfterEvent {
-        self.model.input_handler.edit_field(field);
+        self.display_under_problem(ProblemDataKind::Commands);
+        self.model.edit_field(field);
         DoRefresh
     }
 
@@ -113,25 +121,17 @@ impl Controller {
         match key.code {
             KeyCode::Char('c') => self.edit(CompileCommand),
             KeyCode::Char('r') => self.edit(RunCommand),
+            KeyCode::Char('s') => self.display_under_problem(ProblemDataKind::Commands),
+            KeyCode::Char('t') => self.display_under_problem(ProblemDataKind::TestCases),
+            KeyCode::Char('l') => self.display_under_problem(ProblemDataKind::LastFailedExample),
             KeyCode::Char('q') => self.change_menu(Menu::Select),
             _ => self.universal_actions(key),
         }
     }
 
-    pub fn react_to_event(&self, event: Event) -> AfterEvent {
-        if let Event::Resize(_, _) = event {
-            return DoRefresh;
-        }
-
-        if let Event::Key(key) = event {
-            return match self.model.menu.get() {
-                Menu::Help => self.handle_help_menu(),
-                Menu::Select => self.handle_select_menu(key),
-                Menu::Solve => self.handle_solve_menu(key),
-                _ => self.universal_actions(key),
-            };
-        }
-        return NoRefresh;
+    fn display_under_problem(&self, problem_data_kind: ProblemDataKind) -> AfterEvent {
+        self.model.problem_data_kind.set(problem_data_kind);
+        DoRefresh
     }
 
     fn change_menu(&self, new_menu: Menu) -> AfterEvent {
