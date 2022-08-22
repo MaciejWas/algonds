@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 use tui::style::Color;
 use tui::style::Style;
 use tui::text::Span;
 use tui::text::Spans;
 use tui::widgets::Paragraph;
 
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Menu {
     Select,
     Solve,
@@ -32,7 +32,6 @@ impl Default for Menu {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Difficulty {
     Easy,
@@ -55,29 +54,19 @@ pub struct Example {
     pub output: String,
 }
 
-#[derive(Debug, Clone)]
-pub enum ExampleStatus {
-    Pass,
-    Fail,
-    Cancelled,
-    Running,
-    NotRun,
-    Error(String),
-}
-
-impl<'a> Into<Span<'a>> for ExampleStatus {
-    fn into(self) -> Span<'a> {
+impl TestCaseStatus {
+    pub fn into_span<'a>(self) -> Span<'a> {
         let text = match &self {
-            Self::Pass => "🗹Pass",
-            Self::Fail => "🗷Fail",
-            Self::Running => "⌛Running",
-            Self::Cancelled => "⚠Cancelled",
-            Self::NotRun => "🯄NotRun",
-            Self::Error(_) => "‼Error",
+            Self::Pass { .. } => "🗹 Pass",
+            Self::Fail { .. } => "🗷 Fail",
+            Self::Running => "⌛ Running",
+            Self::Cancelled => "⚠ Cancelled",
+            Self::NotRun => "🯄 NotRun",
+            Self::Err { .. } => "‼ Error",
         };
         let style = match &self {
-            Self::Pass => Style::default().fg(Color::Green),
-            Self::Fail | Self::Error(_) => Style::default().fg(Color::Red),
+            Self::Pass { .. } => Style::default().fg(Color::Green),
+            Self::Fail { .. } | Self::Err { .. } => Style::default().fg(Color::Red),
             Self::Cancelled | Self::Running => Style::default().fg(Color::Yellow),
             Self::NotRun => Style::default().fg(Color::Gray),
         };
@@ -85,7 +74,7 @@ impl<'a> Into<Span<'a>> for ExampleStatus {
     }
 }
 
-impl Default for ExampleStatus {
+impl Default for TestCaseStatus {
     fn default() -> Self {
         Self::NotRun
     }
@@ -119,9 +108,20 @@ pub enum RunRequest {
     PleaseStop,
 }
 
+#[derive(Debug, Clone)]
+pub enum TestCaseStatus {
+    Pass { actual: String },
+    Fail { expected: String, actual: String },
+    Err { err_msg: String },
+    Cancelled,
+    Running,
+    NotRun,
+}
+
+#[derive(Debug, Clone)]
 pub struct RunResponse {
     pub id: usize,
-    pub result: ExampleStatus,
+    pub result: TestCaseStatus,
 }
 
 #[derive(Clone)]

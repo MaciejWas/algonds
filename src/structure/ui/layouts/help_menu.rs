@@ -11,9 +11,16 @@ pub struct HelpScreenLayout {
 }
 
 impl From<Rect> for HelpScreenLayout {
-    fn from(term_size: Rect) -> Self { 
+    fn from(term_size: Rect) -> Self {
         let outer_window = Layout::default().margin(6).split(term_size)[0];
-        let fields = Layout::default().constraints(SPLIT_HELP).split(outer_window);
-        HelpScreenLayout { outer_window, general_help: fields[0], select_help: fields[1], solve_help: fields[2] }
+        let fields = Layout::default()
+            .constraints(SPLIT_HELP)
+            .split(outer_window);
+        HelpScreenLayout {
+            outer_window,
+            general_help: fields[0],
+            select_help: fields[1],
+            solve_help: fields[2],
+        }
     }
 }

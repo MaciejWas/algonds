@@ -1,8 +1,8 @@
 #![feature(test)]
+use std::time::Duration;
 use crate::structure::ui::UIElement;
 extern crate test;
 
-use test::Bencher;
 use crate::structure::controller::AfterEvent;
 use clap;
 use clap::Parser;
@@ -12,6 +12,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io;
+use test::Bencher;
 
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -54,36 +55,30 @@ fn main() {
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Result<()> {
     let mut res = AfterEvent::DoRefresh;
     while !res.is_quit() {
-        if let AfterEvent::DoRefresh = res {
-            terminal.draw(|frame| app.render(frame))?;
+        terminal.draw(|frame| app.render(frame))?;
+        if let Ok(true) = event::poll(Duration::from_millis(50)) {
+            res = app.react_to_event(event::read()?);
         }
-
-        res = app.react_to_event(event::read()?);
     }
     Ok(())
 }
-
 
 #[cfg(test)]
 mod tests {
     use crate::structure::ui::UIElement;
     use crate::AppState;
-    use test::{Bencher, black_box};
+    use test::Bencher;
 
     #[bench]
     fn setup_available_problems(b: &mut Bencher) {
         let app = AppState::default();
 
-        b.iter(|| {
-            crate::structure::ui::AvailableProblems::setup(&app.view)
-        })
+        b.iter(|| crate::structure::ui::AvailableProblems::setup(&app.view))
     }
 
     #[bench]
     fn setup_problem_preview(b: &mut Bencher) {
         let app = AppState::default();
-        b.iter(|| {
-            crate::structure::ui::ProblemView::setup(&app.view)
-        })
+        b.iter(|| crate::structure::ui::ProblemView::setup(&app.view))
     }
 }

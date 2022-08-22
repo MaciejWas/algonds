@@ -15,8 +15,8 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             db_path: DB_ADDR.to_string(),
-            compilation_step: "".to_string(),
-            run_step: "python ./solution.py {args}".to_string(),
+            compilation_step: "echo hi there".to_string(),
+            run_step: "echo hi there".to_string(),
             pretty: true,
         }
     }

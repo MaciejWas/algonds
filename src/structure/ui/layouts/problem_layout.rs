@@ -9,8 +9,12 @@ pub struct ProblemLayout {
 }
 
 impl From<Rect> for ProblemLayout {
-    fn from(term_size: Rect) -> Self { 
+    fn from(term_size: Rect) -> Self {
         let (title, statement, example) = split_problem_preview(term_size);
-        Self { title, statement, example }
+        Self {
+            title,
+            statement,
+            example,
+        }
     }
 }

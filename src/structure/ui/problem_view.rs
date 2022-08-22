@@ -1,18 +1,18 @@
+use crate::structure::common::*;
 use crate::structure::ui::ProblemLayout;
 use crate::structure::ui::SelectScreenLayout;
-use tui::widgets::Wrap;
-use tui::widgets::Paragraph;
 use crate::structure::ui::UIElement;
+use crate::structure::View;
 use std::rc::Rc;
 use tui::layout::Rect;
+use tui::widgets::Paragraph;
+use tui::widgets::Wrap;
 use tui::{
     backend::Backend,
     text::{Span, Spans},
     widgets::{Block, Borders},
-    Frame
+    Frame,
 };
-use crate::structure::common::*;
-use crate::structure::View;
 
 fn example<'a>(exmp: &Example) -> Paragraph<'a> {
     Paragraph::new(vec![
@@ -48,18 +48,24 @@ impl<'a> UIElement for ProblemView<'a> {
         let title = Paragraph::new(Spans::from(bold(problem.problem_name.clone())))
             .alignment(tui::layout::Alignment::Center);
         let statement = Paragraph::new(Spans::from(text(problem.problem_statement.clone())))
-            .wrap( Wrap { trim: false });
-        let example = example(fst_example)
             .wrap(Wrap { trim: false });
+        let example = example(fst_example).wrap(Wrap { trim: false });
 
-        Self { title, statement, example }
+        Self {
+            title,
+            statement,
+            example,
+        }
     }
 
-    fn render<B: Backend> (self, frame: &mut Frame<B>, layout: &ProblemLayout) {
-        let ProblemLayout { title, statement, example } = layout.clone();
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemLayout) {
+        let ProblemLayout {
+            title,
+            statement,
+            example,
+        } = layout.clone();
         frame.render_widget(self.title, title);
         frame.render_widget(self.statement, statement);
         frame.render_widget(self.example, example);
     }
 }
-

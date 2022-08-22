@@ -1,14 +1,14 @@
+use crate::structure::common::*;
 use crate::structure::ui::ProblemScreenLayout;
-use tui::widgets::Paragraph;
 use crate::structure::ui::UIElement;
+use crate::structure::View;
+use tui::widgets::Paragraph;
 use tui::{
-    backend::{Backend},
+    backend::Backend,
     style::{Modifier, Style},
     text::{Span, Spans},
     Frame,
 };
-use crate::structure::common::*;
-use crate::structure::View;
 
 pub struct LastTestCaseView {
     compilation_fail: bool,
@@ -23,18 +23,24 @@ impl UIElement for LastTestCaseView {
         let compilation_fail = true;
         let expected_stdout = "fasdf".into();
         let actual_stdout = None;
-        Self { compilation_fail, expected_stdout, actual_stdout }
+        Self {
+            compilation_fail,
+            expected_stdout,
+            actual_stdout,
+        }
     }
 
-    fn render<B: Backend> (self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
         if self.compilation_fail {
-            let message = Paragraph::new(
-                Span::styled("Compilation failed!", Style::default().fg(tui::style::Color::Red).add_modifier(Modifier::BOLD))
-            );
+            let message = Paragraph::new(Span::styled(
+                "Compilation failed!",
+                Style::default()
+                    .fg(tui::style::Color::Red)
+                    .add_modifier(Modifier::BOLD),
+            ));
             frame.render_widget(message, layout.data);
         } else {
             frame.render_widget(Paragraph::new("Hi there :))"), layout.data);
         }
     }
 }
-

@@ -1,65 +1,55 @@
-use crate::structure::ui::ProblemScreenLayout;
-use crate::structure::ui::SelectScreenLayout;
-use tui::widgets::Wrap;
-use tui::widgets::Paragraph;
-use crate::structure::ui::UIElement;
-use std::rc::Rc;
-use tui::layout::Rect;
-use tui::{
-    backend::{Backend, CrosstermBackend},
-    layout::{Constraint, Corner, Direction, Layout},
-    style::{Color, Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Block, Row, Borders, Table, Cell},
-    Frame, Terminal,
-};
 use crate::structure::common::*;
+use crate::structure::ui::ProblemScreenLayout;
+use crate::structure::ui::UIElement;
 use crate::structure::View;
+use tui::widgets::Paragraph;
+use tui::{
+    backend::Backend,
+    layout::Constraint,
+    text::{Span, Spans},
+    widgets::{Cell, Row, Table},
+    Frame,
+};
 
-fn example<'a>(exmp: &Example) -> Paragraph<'a> {
-    Paragraph::new(vec![
-        Spans::from(bold("Example:".to_string())),
-        Spans::from("    input: \n\n".to_string() + &exmp.input),
-        Spans::from("    output: \n\n".to_string() + &exmp.output),
-    ])
+pub struct TestCaseTable {
+    test_cases: Vec<TestCaseStatus>,
 }
 
-fn bold<'a>(text: impl Into<String>) -> Span<'a> {
-    Span::styled(
-        text.into(),
-        tui::style::Style::default().add_modifier(tui::style::Modifier::BOLD),
-    )
-}
-
-fn text<'a>(t: String) -> Span<'a> {
-    Span::from(t)
-}
-
-pub struct TestCaseTable<'a> {
-    pub x: &'a ()
-}
-
-impl<'a> UIElement for TestCaseTable<'a> {
+impl UIElement for TestCaseTable {
     type ExpectedLayout = ProblemScreenLayout;
 
     fn setup(view: &View) -> Self {
-        Self { x: &() }
+        let test_cases = view.get_test_cases();
+        Self { test_cases }
     }
 
-    fn render<B: Backend> (self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
-        let rows = vec![
-            Row::new(vec![Cell::from("  🗹 Pass"), Cell::from("  ⚠ Cancelled"), Cell::from("  ‼ Error")]),
-            Row::new(vec![Cell::from("  🗷 Fail"), Cell::from("  🯄 NotRun")]),
-            Row::new(vec![Cell::from("  ⌛ Running"), ])
-        ];
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
+        let display_statuses = self
+            .test_cases
+            .into_iter()
+            .map(TestCaseStatus::into_span)
+            .map(Cell::from)
+            .enumerate();
 
-        let constraints = vec![Constraint::Length(10); 12];
+        let mut row_1 = Vec::new();
+        let mut row_2 = Vec::new();
+        let mut row_3 = Vec::new();
 
-        let test_case_data = Table::new(rows)
+        for (i, status) in display_statuses {
+            match i % 3 {
+                0 => row_1.push(status),
+                1 => row_2.push(status),
+                2 => row_3.push(status),
+                _ => {}
+            }
+        }
+
+        let constraints = vec![Constraint::Length(15); 12];
+
+        let test_case_data = Table::new([Row::new(row_1), Row::new(row_2), Row::new(row_3)])
             .column_spacing(3)
             .widths(&constraints);
 
         frame.render_widget(test_case_data, layout.data);
     }
 }
-

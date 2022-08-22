@@ -1,15 +1,12 @@
 use crate::structure::ui::layouts::add_margin;
-use tui::layout::Constraint;
-use crate::structure::ui::ProblemLayout;
 use crate::structure::ui::layouts::get_footnote;
+use crate::structure::ui::ProblemLayout;
+use tui::layout::Constraint;
+use tui::layout::Direction;
 use tui::layout::Layout;
 use tui::layout::Rect;
-use tui::layout::Direction;
 
-const SPLIT_70_30: [Constraint; 2] = [
-    Constraint::Percentage(70),
-    Constraint::Percentage(30)
-];
+const SPLIT_70_30: [Constraint; 2] = [Constraint::Percentage(70), Constraint::Percentage(30)];
 
 #[derive(Clone, Copy)]
 pub struct ProblemScreenLayout {
@@ -17,7 +14,7 @@ pub struct ProblemScreenLayout {
     pub problem: ProblemLayout,
     pub data_window: Rect,
     pub data: Rect,
-    pub footnote: Rect
+    pub footnote: Rect,
 }
 
 impl From<Rect> for ProblemScreenLayout {
@@ -29,7 +26,7 @@ impl From<Rect> for ProblemScreenLayout {
             .split(term_size);
 
         let problem_window = problem_and_data[0];
-        let problem_view = add_margin(problem_window); 
+        let problem_view = add_margin(problem_window);
         let data_window = problem_and_data[1];
         let data = add_margin(data_window);
 
@@ -38,7 +35,7 @@ impl From<Rect> for ProblemScreenLayout {
             data_window,
             problem: ProblemLayout::from(problem_view),
             data,
-            footnote: get_footnote(term_size)
+            footnote: get_footnote(term_size),
         }
     }
 }

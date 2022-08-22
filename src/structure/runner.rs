@@ -49,11 +49,12 @@ impl Default for CodeRunner {
     }
 }
 
+#[derive(Debug)]
 struct RunnableTestCase {
     pub id: usize,
-    command_template: String,
-    arg: String,
-    expected_stdout: String,
+    pub command_template: String,
+    pub arg: String,
+    pub expected_stdout: String,
     process: Option<std::process::Child>,
     start_time: Option<std::time::Instant>,
 }
@@ -70,7 +71,7 @@ impl RunnableTestCase {
         }
     }
 
-    pub fn begin(&mut self) -> Result<(), std::io::Error> {
+    pub fn start(&mut self) -> Result<(), std::io::Error> {
         let process = std::process::Command::new(&self.command_template)
             .arg(&self.arg)
             .spawn()?;
@@ -89,8 +90,8 @@ impl RunnableTestCase {
                 Ok(Some(_exit_status)) => true,
                 Err(_err) => true,
                 Ok(None) => false,
-            }
-            None => panic!("RunnableTestCase::try_finish should not be called before RunnableTestCase::begin :(")
+            },
+            None => false,
         }
     }
 
@@ -101,7 +102,7 @@ impl RunnableTestCase {
             .kill()
     }
 
-    fn get_results(&mut self) -> (ExampleStatus, Duration) {
+    fn get_results(&mut self) -> (TestCaseStatus, Duration) {
         let time = self.start_time.unwrap().elapsed();
         let process = self.process.as_mut().unwrap_or_else(|| {
             panic!("RunnableTestCase::get_results called before process finished.")
@@ -114,13 +115,19 @@ impl RunnableTestCase {
                 if status.success() {
                     let stdout = Self::get_stdout(process);
                     if stdout == self.expected_stdout {
-                        return (ExampleStatus::Pass, time);
+                        return (TestCaseStatus::Pass { actual: stdout }, time);
                     }
-                    return (ExampleStatus::Fail, time);
+                    return (
+                        TestCaseStatus::Fail {
+                            expected: self.expected_stdout.clone(),
+                            actual: stdout,
+                        },
+                        time,
+                    );
                 }
 
                 let stderr = Self::get_stderr(process);
-                return (ExampleStatus::Error(stderr), time);
+                return (TestCaseStatus::Err { err_msg: stderr }, time);
             }
         }
     }
@@ -163,42 +170,41 @@ impl RemoteRunner {
 
     pub fn run(mut self) {
         loop {
-            if let Some(req) = self.receive_new_run_request() {
-                match req {
-                    RunRequest::PleaseRun(run_details) => {
-                        self.abort_curr_run();
-                        self.setup_new_run(run_details)
-                    }
-                    RunRequest::PleaseStop => self.abort_curr_run(),
-                }
-            }
-
+            self.handle_next_request();
             self.continue_running();
         }
     }
 
-    fn continue_running(&mut self) -> Option<()> {
-        let has_finished = self.to_run.front_mut().map(|test_case| {
-            if !test_case.has_started() {
-                test_case.begin().unwrap_or_else(|err| {
-                    panic!("Could not begin test case {}: {}", test_case.id, err)
-                });
-                return false;
+    fn handle_next_request(&mut self) -> Option<()> {
+        let new_request = self.receive_new_run_request()?;
+
+        self.abort_curr_run();
+
+        if let RunRequest::PleaseRun(run_details) = new_request {
+            let compilation_status = self.setup_new_run(run_details);
+            if let Err(err_msg) = compilation_status {
+                let result = TestCaseStatus::Err { err_msg };
+                self.outgoing.send(RunResponse { id: 0, result }).unwrap();
             }
+        }
+        Some(())
+    }
 
-            test_case.has_finished()
-        })?;
+    fn continue_running(&mut self) -> Option<()> {
+        let current_test_case = self.to_run.front_mut()?;
 
-        if has_finished {
-            let mut finished_test_case = self
-                .to_run
-                .pop_front()
-                .unwrap_or_else(|| panic!("test case was unexpectely removed"));
+        if !current_test_case.has_started() {
+            current_test_case.start();
+            self.outgoing.send( RunResponse { id: current_test_case.id, result: TestCaseStatus::Running } ).unwrap();
+            return Some(());
+        }
+
+        if current_test_case.has_finished() {
+            println!("heyy finished");
+            let mut finished_test_case = self.to_run.pop_front()?;
             let (status, time_completed) = finished_test_case.get_results();
-            self.notify_finished(&finished_test_case, status, time_completed)
-                .unwrap_or_else(|err| {
-                    panic!("failed to notify that test case was finished: {}", err)
-                });
+            self.notify_finished(&finished_test_case, status, time_completed);
+            return Some(());
         }
 
         Some(())
@@ -215,11 +221,11 @@ impl RemoteRunner {
     fn notify_cancelled(&self, test_case: &RunnableTestCase) -> Result<(), SendError<RunResponse>> {
         self.outgoing.send(RunResponse {
             id: test_case.id,
-            result: ExampleStatus::Cancelled,
+            result: TestCaseStatus::Cancelled,
         })
     }
 
-    fn setup_new_run(&mut self, run_details: RunDetails) {
+    fn setup_new_run(&mut self, run_details: RunDetails) -> Result<String, String> {
         let RunDetails {
             compile_script,
             run_script,
@@ -230,21 +236,30 @@ impl RemoteRunner {
             .enumerate()
             .map(|(id, ex)| RunnableTestCase::new(id, run_script.clone(), ex.input, ex.output))
             .collect();
-        self.compile(compile_script);
+        self.compile(compile_script)
     }
 
-    fn compile(&self, command: String) -> Option<std::io::Error> {
-        let compile_output = std::process::Command::new(command).output();
-        match compile_output {
-            Err(e) => Some(e),
-            Ok(_) => None,
-        }
+    fn compile(&self, command: String) -> Result<String, String> {
+        let command_and_args =
+            shlex::split(&command).ok_or("command \"{command}\" is invalid!".to_string())?;
+        let main_command = command_and_args
+            .first()
+            .ok_or("Compile script is empty!".to_string())?;
+        let args = command_and_args.iter().skip(1);
+
+        let compile_output = std::process::Command::new(&main_command)
+            .args(args)
+            .output();
+
+        compile_output
+            .map_err(|err| format!("{}", err))
+            .map(|ok| "Compilation success!".to_string())
     }
 
     fn notify_finished(
         &self,
         test_case: &RunnableTestCase,
-        status: ExampleStatus,
+        status: TestCaseStatus,
         _time_completed: Duration,
     ) -> Result<(), SendError<RunResponse>> {
         self.outgoing.send(RunResponse {

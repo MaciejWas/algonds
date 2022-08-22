@@ -1,14 +1,13 @@
 use crate::structure::ui::HelpScreenLayout;
-use tui::widgets::Wrap;
-use tui::widgets::Paragraph;
 use crate::structure::ui::UIElement;
+use crate::structure::View;
+use tui::widgets::Paragraph;
+use tui::widgets::Wrap;
 use tui::{
     backend::Backend,
     text::{Span, Spans},
     Frame,
 };
-use crate::structure::View;
-
 
 fn bold<'a, T: Into<String>>(text: T) -> Span<'a> {
     Span::styled(
@@ -65,13 +64,16 @@ impl<'a> UIElement for Help<'a> {
         let general_help = Self::create_general_help();
         let select_help = Self::create_select_help();
         let solve_help = Self::create_solve_help();
-        Self { general_help, select_help, solve_help }
+        Self {
+            general_help,
+            select_help,
+            solve_help,
+        }
     }
 
-    fn render<B: Backend> (self, frame: &mut Frame<B>, layout: &HelpScreenLayout) {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &HelpScreenLayout) {
         frame.render_widget(self.general_help, layout.general_help);
         frame.render_widget(self.select_help, layout.select_help);
         frame.render_widget(self.solve_help, layout.solve_help);
     }
 }
-

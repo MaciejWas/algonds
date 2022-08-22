@@ -1,15 +1,13 @@
-use crate::structure::ui::SelectScreenLayout;
-use crate::structure::ui::ProblemScreenLayout;
-use crate::structure::ui::HelpScreenLayout;
-use crate::structure::ui;
 use crate::structure::common::Menu;
 use crate::structure::controller::AfterEvent;
+use crate::structure::controller::Controller;
+use crate::structure::ui;
+use crate::structure::ui::HelpScreenLayout;
+use crate::structure::ui::ProblemScreenLayout;
+use crate::structure::ui::SelectScreenLayout;
 use crate::structure::ui::UIElement;
 use crossterm::event::Event;
-use tui::{
-    backend::Backend,
-    Frame,
-};
+use tui::{backend::Backend, Frame};
 
 use crate::structure::AppState;
 

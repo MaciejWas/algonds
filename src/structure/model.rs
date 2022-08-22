@@ -1,21 +1,22 @@
-use std::sync::mpsc::SendError;
-use tui::layout::Direction;
-use std::ops::DerefMut;
-use tui::widgets::ListState;
+use crate::structure::common::Menu;
 use crate::structure::common::*;
 use crate::structure::runner::CodeRunner;
-use crate::structure::common::Menu;
 use crate::structure::Settings;
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::ops::DerefMut;
 use std::rc::Rc;
+use std::sync::mpsc::SendError;
+use tui::layout::Direction;
+use tui::widgets::ListState;
 
 pub type Db = Vec<Rc<Problem>>;
 
 pub struct InputHandler {
     raw_input: RefCell<String>,
-    direction: Cell<Option<InputField>>
-} impl InputHandler {
+    direction: Cell<Option<InputField>>,
+}
+impl InputHandler {
     pub fn is_in_input_mode(&self) -> bool {
         self.direction.get().is_some()
     }
@@ -51,9 +52,13 @@ pub struct InputHandler {
         self.direction.set(None);
         self.raw_input.replace(String::new())
     }
-} impl Default for InputHandler {
-    fn default() -> Self { 
-        Self { raw_input: RefCell::default(), direction: Cell::default() } 
+}
+impl Default for InputHandler {
+    fn default() -> Self {
+        Self {
+            raw_input: RefCell::default(),
+            direction: Cell::default(),
+        }
     }
 }
 
@@ -62,10 +67,10 @@ pub struct Model {
     pub input_handler: InputHandler,
     pub settings: RefCell<Settings>,
     pub menu: Cell<Menu>,
-    
+
     db: Db,
     code_runner: CodeRunner,
-    test_cases: RefCell<Vec<ExampleStatus>>,
+    test_cases: RefCell<Vec<TestCaseStatus>>,
     list_state: RefCell<ListState>,
 }
 
@@ -79,7 +84,7 @@ impl Model {
             settings: RefCell::new(settings.clone()),
             menu: Cell::default(),
             test_cases: RefCell::default(),
-            list_state: RefCell::default()
+            list_state: RefCell::default(),
         })
     }
 
@@ -92,7 +97,15 @@ impl Model {
         let change: i16 = if up { 1 } else { -1 };
         let new_id = id
             .map(|i| i as i16 + change)
-            .map(|i| if i < 0 { 0 } else if i >= self.total_problems() as i16 { i - 1 } else { i } )
+            .map(|i| {
+                if i < 0 {
+                    0
+                } else if i >= self.total_problems() as i16 {
+                    i - 1
+                } else {
+                    i
+                }
+            })
             .map(|i| i as usize)
             .or(Some(0));
 
@@ -102,6 +115,19 @@ impl Model {
     pub fn edit_field(&self, field: InputField) {
         let current_value = self.get_field(field);
         self.input_handler.edit_field(current_value, field)
+    }
+
+    pub fn go_to(&self, menu: Menu) {
+        self.menu.set(menu);
+        if menu == Menu::Solve {
+            self.reset_test_cases()
+        }
+    }
+
+    pub fn reset_test_cases(&self) {
+        let mut test_cases = self.test_cases.borrow_mut();
+        let n_examples = self.current_problem().examples.len();
+        *test_cases = vec![TestCaseStatus::default(); n_examples]
     }
 
     pub fn cancel_edit(&self) {
@@ -123,8 +149,26 @@ impl Model {
         self.code_runner.please_stop()
     }
 
-    fn get_run_updates(&self) -> Vec<RunResponse> {
-        self.code_runner.get_updates()
+    pub fn update_test_cases(&self) -> bool {
+        let updates = self.code_runner.get_updates();
+        if updates.len() == 0 {
+            return false;
+        };
+
+        print!("Received updated: {:?}", updates);
+
+        let mut test_cases = self.test_cases.borrow_mut();
+
+        for update in updates.into_iter() {
+            let RunResponse { id, result } = update;
+
+            let to_edit = test_cases
+                .get_mut(id)
+                .unwrap_or_else(|| panic!("Could not apply update run details for example {id}"));
+            *to_edit = result;
+        }
+
+        true
     }
 
     pub fn current_problem<'a>(&'a self) -> Rc<Problem> {
@@ -196,7 +240,8 @@ impl Model {
         }
     }
 
-    pub fn test_cases() {
-
+    pub fn test_cases(&self) -> Vec<TestCaseStatus> {
+        self.update_test_cases();
+        self.test_cases.borrow().clone()
     }
 }

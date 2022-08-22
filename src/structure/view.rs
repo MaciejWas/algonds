@@ -1,9 +1,9 @@
-use tui::widgets::ListState;
 use crate::structure::common::*;
 use crate::structure::ModelRef;
 use crate::structure::Problem;
 use std::cell::RefCell;
 use std::rc::Rc;
+use tui::widgets::ListState;
 
 pub struct View {
     model: ModelRef,
@@ -28,8 +28,8 @@ impl View {
 
     pub fn get_cursor(&self) -> String {
         let sign = if self.model.settings.borrow().pretty {
-           " 🡆 "
-        } else { 
+            " 🡆 "
+        } else {
             " -> "
         };
         sign.to_string()
@@ -54,7 +54,7 @@ impl View {
     pub fn compile_command_view(&self) -> String {
         if self.model.input_handler.is_in_input_mode() {
             if self.model.input_handler.current_field() == Some(InputField::CompileCommand) {
-                return self.model.input_handler.curr_input() + &"|"
+                return self.model.input_handler.curr_input() + &"|";
             }
         }
 
@@ -64,10 +64,15 @@ impl View {
     pub fn run_command_view(&self) -> String {
         if self.model.input_handler.is_in_input_mode() {
             if self.model.input_handler.current_field() == Some(InputField::RunCommand) {
-                return self.model.input_handler.curr_input() + &"|"
+                return self.model.input_handler.curr_input() + &"|";
             }
         }
 
         return self.model.get_field(InputField::RunCommand);
+    }
+
+    pub fn get_test_cases(&self) -> Vec<TestCaseStatus> {
+        self.model.update_test_cases();
+        self.model.test_cases()
     }
 }

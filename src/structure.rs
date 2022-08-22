@@ -1,16 +1,17 @@
-use tui::widgets::ListState;
 use crate::arguments::*;
 use crate::structure::controller::Controller;
+use crate::structure::controller::MainController;
 use crate::structure::view::View;
 use std::rc::Rc;
+use tui::widgets::ListState;
 
 pub mod common;
 pub mod controller;
 pub mod model;
 mod runner;
 pub mod settings;
-pub mod view;
 pub mod ui;
+pub mod view;
 
 use common::*;
 use model::Model;
@@ -20,20 +21,20 @@ pub type ModelRef = Rc<Model>;
 
 pub struct AppState {
     pub view: Rc<View>,
-    pub controller: Controller,
+    pub controller: MainController,
 }
 
 impl Default for AppState {
-    fn default() -> Self { 
+    fn default() -> Self {
         let settings = Settings::default();
         let model: ModelRef = Model::new_ref(settings);
-            let controller = Controller::from(&model);
-            let view = View::from(&model);
+        let controller = MainController::setup(&model);
+        let view = View::from(&model);
 
-            Self {
-                view: Rc::new(view),
-                controller: controller,
-            }
+        Self {
+            view: Rc::new(view),
+            controller: controller,
+        }
     }
 }
 
@@ -46,7 +47,7 @@ impl From<AppArgs> for AppState {
             .unwrap_or(Settings::from(&args));
 
         let model: ModelRef = Model::new_ref(settings);
-        let controller = Controller::from(&model);
+        let controller = MainController::setup(&model);
         let view = View::from(&model);
 
         Self {
