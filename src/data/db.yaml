@@ -163,7 +163,6 @@
   difficulty: Easy
 
 
-
 - problem_name: Print "Hello, world!" (tutorial)
   problem_statement: Hi! Thanks for using my app :) 
     After selecting interesting exercise you should provide path to the input file and the command you wish to compile your solution.

@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use crate::structure::common::*;
 use std::collections::VecDeque;
 use std::io::Read;
@@ -5,6 +6,15 @@ use std::process::Child;
 use std::sync::mpsc;
 use std::sync::mpsc::SendError;
 use std::time::Duration;
+use std::process::Command;
+
+fn parse_command(text: impl Into<String>) -> Result<Command, String> {
+    let command_and_args = shlex::split(&text.into())
+        .ok_or("Command \"{command}\" is invalid!".to_string())?;
+    let mut command = Command::new(&command_and_args[0]);
+    command.args(&command_and_args[1..]);
+    Ok(command)
+}
 
 pub struct CodeRunner {
     incoming: mpsc::Receiver<RunResponse>,
@@ -55,6 +65,9 @@ struct RunnableTestCase {
     pub command_template: String,
     pub arg: String,
     pub expected_stdout: String,
+
+    stdout: RefCell<String>,
+    stderr: RefCell<String>,
     process: Option<std::process::Child>,
     start_time: Option<std::time::Instant>,
 }
@@ -65,16 +78,20 @@ impl RunnableTestCase {
             id,
             command_template: command_template,
             arg: arg,
+            stdout: RefCell::default(),
+            stderr: RefCell::default(),
             process: None,
             start_time: None,
             expected_stdout,
         }
     }
 
-    pub fn start(&mut self) -> Result<(), std::io::Error> {
-        let process = std::process::Command::new(&self.command_template)
-            .arg(&self.arg)
-            .spawn()?;
+    pub fn start(&mut self) -> Result<(), String> {
+        let process = parse_command(format!("{} {}", self.command_template, self.arg))
+            .map_err(|err| format!("{}", err))?
+            .spawn()
+            .map_err(|err| format!("{}", err))?;
+
         self.process = Some(process);
         self.start_time = Some(std::time::Instant::now());
         Ok(())
@@ -102,9 +119,10 @@ impl RunnableTestCase {
             .kill()
     }
 
-    fn get_results(&mut self) -> (TestCaseStatus, Duration) {
-        let time = self.start_time.unwrap().elapsed();
-        let process = self.process.as_mut().unwrap_or_else(|| {
+    fn get_results(self) -> (TestCaseStatus, Duration) {
+        let Self { id, command_template, arg, expected_stdout, stdout, stderr, process, start_time } = self;
+        let time = start_time.unwrap().elapsed();
+        let mut process = process.unwrap_or_else(|| {
             panic!("RunnableTestCase::get_results called before process finished.")
         });
         let exit_status = process.try_wait().unwrap();
@@ -114,12 +132,12 @@ impl RunnableTestCase {
             Some(status) => {
                 if status.success() {
                     let stdout = Self::get_stdout(process);
-                    if stdout == self.expected_stdout {
+                    if stdout == expected_stdout {
                         return (TestCaseStatus::Pass { actual: stdout }, time);
                     }
                     return (
                         TestCaseStatus::Fail {
-                            expected: self.expected_stdout.clone(),
+                            expected: expected_stdout.clone(),
                             actual: stdout,
                         },
                         time,
@@ -132,24 +150,16 @@ impl RunnableTestCase {
         }
     }
 
-    fn get_stderr(process: &mut Child) -> String {
+    fn get_stderr(process: Child) -> String {
         let mut stderr = String::new();
-        process.stderr.as_mut().unwrap().read_to_string(&mut stderr);
+        process.stderr.unwrap().read_to_string(&mut stderr);
         stderr
     }
 
-    fn get_stdout(process: &mut Child) -> String {
+    fn get_stdout(process: Child) -> String {
         let mut stdout = String::new();
-        process.stdout.as_mut().unwrap().read_to_string(&mut stdout);
+        process.stdout.unwrap().read_to_string(&mut stdout);
         stdout
-    }
-}
-
-impl Drop for RunnableTestCase {
-    fn drop(&mut self) {
-        if self.process.is_some() {
-            self.kill().unwrap();
-        }
     }
 }
 
@@ -196,8 +206,7 @@ impl RemoteRunner {
     }
 
     fn continue_running_last_request(&mut self) -> Option<()> {
-        let current_test_case = self.to_run.front_mut()?;
-        let id: usize = current_test_case.id;
+        let mut current_test_case = self.to_run.pop_front()?;
 
         if !current_test_case.has_started() {
             let status = match current_test_case.start() {
@@ -207,17 +216,15 @@ impl RemoteRunner {
                     TestCaseStatus::Err { err_msg } 
                 }
             };
-            self.notify(id, status);
-            return Some(());
+            self.notify(current_test_case.id, status).unwrap();
         }
 
-        panic!("HOly sheeet");
-
         if current_test_case.has_finished() {
-            let mut finished_test_case = self.to_run.pop_front()?;
-            let (status, time_completed) = finished_test_case.get_results();
-            self.notify_finished(&finished_test_case, status, time_completed);
-            return Some(());
+            let id: usize = current_test_case.id.clone();
+            let (status, time_completed) = current_test_case.get_results();
+            self.notify(id, status).unwrap();
+        } else {
+            self.to_run.push_front(current_test_case);
         }
 
         Some(())
@@ -253,32 +260,10 @@ impl RemoteRunner {
     }
 
     fn compile(&self, command: String) -> Result<String, String> {
-        let command_and_args =
-            shlex::split(&command).ok_or("command \"{command}\" is invalid!".to_string())?;
-        let main_command = command_and_args
-            .first()
-            .ok_or("Compile script is empty!".to_string())?;
-        let args = command_and_args.iter().skip(1);
-
-        let compile_output = std::process::Command::new(&main_command)
-            .args(args)
-            .output();
-
-        compile_output
+        let mut process = parse_command(command)?;
+        process.output()
             .map_err(|err| format!("{}", err))
             .map(|ok| "Compilation success!".to_string())
-    }
-
-    fn notify_finished(
-        &self,
-        test_case: &RunnableTestCase,
-        status: TestCaseStatus,
-        _time_completed: Duration,
-    ) -> Result<(), SendError<RunResponse>> {
-        self.outgoing.send(RunResponse {
-            id: test_case.id,
-            status,
-        })
     }
 
     fn receive_new_run_request(&self) -> Option<RunRequest> {
