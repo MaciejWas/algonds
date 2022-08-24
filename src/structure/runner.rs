@@ -81,7 +81,7 @@ impl RunnableTestCase {
     }
 
     pub fn has_started(&self) -> bool {
-        self.start_time.is_some()
+        self.process.is_some()
     }
 
     pub fn has_finished(&mut self) -> bool {
@@ -170,12 +170,12 @@ impl RemoteRunner {
 
     pub fn run(mut self) {
         loop {
-            self.handle_next_request();
-            self.continue_running();
+            self.try_handle_next_request();
+            self.continue_running_last_request();
         }
     }
 
-    fn handle_next_request(&mut self) -> Option<()> {
+    fn try_handle_next_request(&mut self) -> Option<()> {
         let new_request = self.receive_new_run_request()?;
 
         self.abort_curr_run();
@@ -183,24 +183,37 @@ impl RemoteRunner {
         if let RunRequest::PleaseRun(run_details) = new_request {
             let compilation_status = self.setup_new_run(run_details);
             if let Err(err_msg) = compilation_status {
-                let result = TestCaseStatus::Err { err_msg };
-                self.outgoing.send(RunResponse { id: 0, result }).unwrap();
+                let status = TestCaseStatus::Err { err_msg };
+                self.notify(0, status);
             }
         }
         Some(())
     }
 
-    fn continue_running(&mut self) -> Option<()> {
+    fn notify(&self, id: usize, status: TestCaseStatus) -> Result<(), SendError<RunResponse>> {
+        let response = RunResponse { id, status };
+        self.outgoing.send(response)
+    }
+
+    fn continue_running_last_request(&mut self) -> Option<()> {
         let current_test_case = self.to_run.front_mut()?;
+        let id: usize = current_test_case.id;
 
         if !current_test_case.has_started() {
-            current_test_case.start();
-            self.outgoing.send( RunResponse { id: current_test_case.id, result: TestCaseStatus::Running } ).unwrap();
+            let status = match current_test_case.start() {
+                Ok(()) => TestCaseStatus::Running,
+                Err(err) => {
+                    let err_msg = format!("{}", err);
+                    TestCaseStatus::Err { err_msg } 
+                }
+            };
+            self.notify(id, status);
             return Some(());
         }
 
+        panic!("HOly sheeet");
+
         if current_test_case.has_finished() {
-            println!("heyy finished");
             let mut finished_test_case = self.to_run.pop_front()?;
             let (status, time_completed) = finished_test_case.get_results();
             self.notify_finished(&finished_test_case, status, time_completed);
@@ -221,7 +234,7 @@ impl RemoteRunner {
     fn notify_cancelled(&self, test_case: &RunnableTestCase) -> Result<(), SendError<RunResponse>> {
         self.outgoing.send(RunResponse {
             id: test_case.id,
-            result: TestCaseStatus::Cancelled,
+            status: TestCaseStatus::Cancelled,
         })
     }
 
@@ -264,7 +277,7 @@ impl RemoteRunner {
     ) -> Result<(), SendError<RunResponse>> {
         self.outgoing.send(RunResponse {
             id: test_case.id,
-            result: status,
+            status,
         })
     }
 

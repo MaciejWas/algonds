@@ -28,9 +28,7 @@ impl UIElement for ProblemData {
         match to_show {
             ProblemDataKind::TestCases => Self::TestCases(TestCaseTable::setup(&view)),
             ProblemDataKind::Commands => Self::Commands(CommandsView::setup(&view)),
-            ProblemDataKind::LastFailedExample => {
-                Self::LastFailedExample(LastTestCaseView::setup(&view))
-            }
+            ProblemDataKind::LastFailedExample => Self::LastFailedExample(LastTestCaseView::setup(&view))
         }
     }
 

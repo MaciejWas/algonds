@@ -24,6 +24,14 @@ impl AfterEvent {
     pub fn is_quit(&self) -> bool {
         self.eq(&Self::Quit)
     }
+
+    pub fn or(self, other: Self) -> Self {
+        match (&self, &other) {
+            (_, Quit) => Quit,
+            (NoRefresh, DoRefresh) => DoRefresh,
+            _ => self,
+        }
+    }
 }
 
 impl Default for AfterEvent {
@@ -67,7 +75,7 @@ impl Controller for MainController {
             };
 
             if result == AfterEvent::NoRefresh {
-                return self.universal_actions(key)
+                return self.universal_actions(key);
             }
 
             return result;

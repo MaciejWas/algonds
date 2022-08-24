@@ -130,6 +130,20 @@
   examples:
     - input: ""
       output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
+    - input: ""
+      output: "Hello, world!"
   difficulty: Easy
 
 

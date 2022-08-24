@@ -1,3 +1,4 @@
+use tui::style::Style;
 use crate::structure::common::*;
 use crate::structure::ui::ProblemScreenLayout;
 use crate::structure::ui::UIElement;
@@ -10,6 +11,13 @@ use tui::{
     widgets::{Cell, Row, Table},
     Frame,
 };
+
+fn add_number(n: usize, text: Span) -> Spans {
+    Spans::from(vec![
+        Span::from(format!("{}. ", n)),
+        text
+    ])
+}
 
 pub struct TestCaseTable {
     test_cases: Vec<TestCaseStatus>,
@@ -28,8 +36,10 @@ impl UIElement for TestCaseTable {
             .test_cases
             .into_iter()
             .map(TestCaseStatus::into_span)
+            .enumerate()
+            .map(|(n, text)| add_number(n, text))
             .map(Cell::from)
-            .enumerate();
+            .enumerate(); // Stupid and slow :(
 
         let mut row_1 = Vec::new();
         let mut row_2 = Vec::new();

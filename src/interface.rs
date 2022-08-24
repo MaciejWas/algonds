@@ -44,13 +44,14 @@ impl AppState {
         problem_view.render(frame, &layout.problem_preview);
     }
 
-    pub fn update(&mut self) {}
-
     pub fn react_to_event(&mut self, event: Event) -> AfterEvent {
         self.controller.react_to_event(event)
     }
 
     pub fn react_to_code_runner(&mut self) -> AfterEvent {
-        AfterEvent::NoRefresh // todo: Impl;
+        match self.view.check_for_changes() {
+            true => AfterEvent::DoRefresh,
+            false => AfterEvent::NoRefresh 
+        }
     }
 }

@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
 use tui::style::Color;
 use tui::style::Style;
 use tui::text::Span;
@@ -118,10 +117,19 @@ pub enum TestCaseStatus {
     NotRun,
 }
 
+impl TestCaseStatus {
+    pub fn is_err(&self) -> bool {
+    match self {
+        Self::Err {..} => true,
+        _ => false
+    }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct RunResponse {
     pub id: usize,
-    pub result: TestCaseStatus,
+    pub status: TestCaseStatus,
 }
 
 #[derive(Clone)]

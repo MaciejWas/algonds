@@ -75,4 +75,12 @@ impl View {
         self.model.update_test_cases();
         self.model.test_cases()
     }
+
+    pub fn get_last_failed(&self) -> Option<(usize, TestCaseStatus)> {
+        self.model.last_failed_test_case()
+    }
+
+    pub fn check_for_changes(&self) -> bool {
+        self.model.check_for_changes()
+    }
 }

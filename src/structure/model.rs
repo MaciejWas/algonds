@@ -3,11 +3,10 @@ use crate::structure::common::*;
 use crate::structure::runner::CodeRunner;
 use crate::structure::Settings;
 use std::cell::Cell;
+use std::iter::Iterator;
 use std::cell::RefCell;
-use std::ops::DerefMut;
 use std::rc::Rc;
 use std::sync::mpsc::SendError;
-use tui::layout::Direction;
 use tui::widgets::ListState;
 
 pub type Db = Vec<Rc<Problem>>;
@@ -70,6 +69,7 @@ pub struct Model {
 
     db: Db,
     code_runner: CodeRunner,
+    new_test_cases: Cell<bool>, 
     test_cases: RefCell<Vec<TestCaseStatus>>,
     list_state: RefCell<ListState>,
 }
@@ -85,6 +85,7 @@ impl Model {
             menu: Cell::default(),
             test_cases: RefCell::default(),
             list_state: RefCell::default(),
+            new_test_cases: Cell::default(),
         })
     }
 
@@ -154,18 +155,15 @@ impl Model {
         if updates.len() == 0 {
             return false;
         };
-
-        print!("Received updated: {:?}", updates);
-
+        
+        self.new_test_cases.set(true);
         let mut test_cases = self.test_cases.borrow_mut();
 
-        for update in updates.into_iter() {
-            let RunResponse { id, result } = update;
-
+        for RunResponse { id, status } in updates.into_iter() {
             let to_edit = test_cases
                 .get_mut(id)
                 .unwrap_or_else(|| panic!("Could not apply update run details for example {id}"));
-            *to_edit = result;
+            *to_edit = status;
         }
 
         true
@@ -243,5 +241,19 @@ impl Model {
     pub fn test_cases(&self) -> Vec<TestCaseStatus> {
         self.update_test_cases();
         self.test_cases.borrow().clone()
+    }
+
+    pub fn last_failed_test_case(&self) -> Option<(usize, TestCaseStatus)> {
+        self.test_cases.borrow().iter()
+            .enumerate()
+            .filter(|(_, tc)| tc.is_err())
+            .map(|(n, tc)| (n, tc.clone()))
+            .next()
+    }
+
+    pub fn check_for_changes(&self) -> bool {
+        let changes = self.new_test_cases.get();
+        self.new_test_cases.set(false);
+        changes
     }
 }

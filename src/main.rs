@@ -1,6 +1,7 @@
 #![feature(test)]
-use std::time::Duration;
+use crate::AfterEvent::DoRefresh;
 use crate::structure::ui::UIElement;
+use std::time::Duration;
 extern crate test;
 
 use crate::structure::controller::AfterEvent;
@@ -53,12 +54,19 @@ fn main() {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Result<()> {
-    let mut res = AfterEvent::DoRefresh;
-    while !res.is_quit() {
-        terminal.draw(|frame| app.render(frame))?;
-        if let Ok(true) = event::poll(Duration::from_millis(50)) {
-            res = app.react_to_event(event::read()?);
+    let mut action = AfterEvent::DoRefresh;
+    while !action.is_quit() {
+        if action == DoRefresh {
+            terminal.draw(|frame| app.render(frame))?;
         }
+
+        let there_is_new_event = event::poll(Duration::from_millis(500)).unwrap_or(false);
+        if there_is_new_event {
+            let new_event = event::read()?;
+            action = app.react_to_event(new_event).or(action);
+        }
+
+        action = app.react_to_code_runner().or(action);
     }
     Ok(())
 }
