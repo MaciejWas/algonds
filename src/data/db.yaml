@@ -112,7 +112,7 @@
     - hello
     - world
   examples:
-    - input: ""
+    - input: "Hi there!"
       output: "Hello, world!"
   difficulty: Easy
 
@@ -128,21 +128,21 @@
     - hello
     - world
   examples:
-    - input: ""
+    - input: "fsdaf232"
       output: "Hello, world!"
-    - input: ""
+    - input: "4234234"
       output: "Hello, world!"
-    - input: ""
+    - input: "ffsdfsd"
       output: "Hello, world!"
-    - input: ""
+    - input: "fdsf32"
       output: "Hello, world!"
-    - input: ""
+    - input: "fasdfweafj093"
       output: "Hello, world!"
-    - input: ""
+    - input: "fasdfweafj093"
       output: "Hello, world!"
-    - input: ""
+    - input: "fasdfweafj093"
       output: "Hello, world!"
-    - input: ""
+    - input: "fasdfweafj093"
       output: "Hello, world!"
   difficulty: Easy
 
