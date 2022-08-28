@@ -1,15 +1,15 @@
-use crate::structure::common::Menu;
-use crate::structure::controller::AfterEvent;
-use crate::structure::controller::Controller;
-use crate::structure::ui;
-use crate::structure::ui::HelpScreenLayout;
-use crate::structure::ui::ProblemScreenLayout;
-use crate::structure::ui::SelectScreenLayout;
-use crate::structure::ui::UIElement;
+use crate::application::common::Menu;
+use crate::application::controller::AfterEvent;
+use crate::application::controller::Controller;
+use crate::application::ui;
+use crate::application::ui::HelpScreenLayout;
+use crate::application::ui::ProblemScreenLayout;
+use crate::application::ui::SelectScreenLayout;
+use crate::application::ui::UIElement;
 use crossterm::event::Event;
 use tui::{backend::Backend, Frame};
 
-use crate::structure::AppState;
+use crate::application::AppState;
 
 impl AppState {
     pub fn render<B: Backend>(&mut self, term: &mut Frame<B>) {
@@ -51,7 +51,7 @@ impl AppState {
     pub fn react_to_code_runner(&mut self) -> AfterEvent {
         match self.view.check_for_changes() {
             true => AfterEvent::DoRefresh,
-            false => AfterEvent::NoRefresh 
+            false => AfterEvent::NoRefresh,
         }
     }
 }

@@ -1,32 +1,31 @@
 #![feature(test)]
+use crate::application::ui::UIElement;
 use crate::AfterEvent::DoRefresh;
-use crate::structure::ui::UIElement;
 use std::time::Duration;
 extern crate test;
 
-use crate::structure::controller::AfterEvent;
+use crate::application::controller::AfterEvent;
 use clap;
 use clap::Parser;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture},
+    event::{self},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io;
-use test::Bencher;
 
 use tui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
 
+mod application;
 mod arguments;
 mod complexity;
 mod interface;
-mod structure;
 
+use application::AppState;
 use arguments::AppArgs;
-use structure::AppState;
 
 fn main() {
     let args = AppArgs::parse();
@@ -35,7 +34,7 @@ fn main() {
     // Setup terminal
     enable_raw_mode().unwrap();
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture);
+    execute!(stdout, EnterAlternateScreen).unwrap();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend).unwrap();
 
@@ -46,8 +45,7 @@ fn main() {
     execute!(
         terminal.backend_mut(),
         LeaveAlternateScreen,
-        DisableMouseCapture
-    );
+    ).unwrap();
     terminal.show_cursor().unwrap();
 
     result.unwrap();
@@ -73,7 +71,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Res
 
 #[cfg(test)]
 mod tests {
-    use crate::structure::ui::UIElement;
+    use crate::application::ui::UIElement;
     use crate::AppState;
     use test::Bencher;
 
@@ -81,12 +79,12 @@ mod tests {
     fn setup_available_problems(b: &mut Bencher) {
         let app = AppState::default();
 
-        b.iter(|| crate::structure::ui::AvailableProblems::setup(&app.view))
+        b.iter(|| crate::application::ui::AvailableProblems::setup(&app.view))
     }
 
     #[bench]
     fn setup_problem_preview(b: &mut Bencher) {
         let app = AppState::default();
-        b.iter(|| crate::structure::ui::ProblemView::setup(&app.view))
+        b.iter(|| crate::application::ui::ProblemView::setup(&app.view))
     }
 }

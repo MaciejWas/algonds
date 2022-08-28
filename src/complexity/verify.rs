@@ -1,7 +1,7 @@
 use crate::complexity::Function;
 use std::iter::zip;
 
-fn verify(
+fn _verify(
     expected_complexity: Box<dyn Function>,
     x: Vec<u32>,
     y: Vec<u32>,
@@ -21,11 +21,11 @@ fn verify(
 
     Ok(zip(test_x, test_y)
         .into_iter()
-        .map(|(x, y)| find_err(intercept + x as f64 * slope, y as f64))
+        .map(|(x, y)| _find_err(intercept + x as f64 * slope, y as f64))
         .min_by(|a, b| a.partial_cmp(b).unwrap())
         .unwrap()) // TODO: Remove unwrap
 }
 
-fn find_err(expected: f64, real: f64) -> f64 {
+fn _find_err(expected: f64, real: f64) -> f64 {
     f64::max(expected, real) / expected - 1.0
 }
