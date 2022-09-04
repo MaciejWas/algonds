@@ -66,10 +66,11 @@ pub struct Model {
     pub input_handler: InputHandler,
     pub settings: RefCell<Settings>,
     pub menu: Cell<Menu>,
+    pub selected_test_case: Cell<usize>,
 
     db: Db,
     code_runner: CodeRunner,
-    new_test_cases: Cell<bool>,
+    new_test_cases_arrived: Cell<bool>,
     test_cases: RefCell<Vec<TestCaseStatus>>,
     list_state: RefCell<ListState>,
 }
@@ -85,12 +86,24 @@ impl Model {
             menu: Cell::default(),
             test_cases: RefCell::default(),
             list_state: RefCell::default(),
-            new_test_cases: Cell::default(),
+            new_test_cases_arrived: Cell::default(),
+            selected_test_case: Cell::default(),
         })
     }
 
     pub fn get_list_state(&self) -> RefCell<ListState> {
         self.list_state.clone()
+    }
+
+    pub fn select_next_tc(&self, up: bool) {
+        let id = self.selected_test_case.get();
+        let n_test_cases = self.test_cases.borrow().len();
+        
+        if up {
+            self.selected_test_case.set(std::cmp::max(id + 1, n_test_cases));
+        } else if id > 0 {
+            self.selected_test_case.set(id - 1);
+        }
     }
 
     pub fn select_next(&self, up: bool) {
@@ -127,8 +140,8 @@ impl Model {
 
     pub fn reset_test_cases(&self) {
         let mut test_cases = self.test_cases.borrow_mut();
-        let n_examples = self.current_problem().examples.len();
-        *test_cases = vec![TestCaseStatus::default(); n_examples]
+        let n = self.current_problem().test_cases.len();
+        *test_cases = vec![TestCaseStatus::default(); n]
     }
 
     pub fn cancel_edit(&self) {
@@ -144,7 +157,7 @@ impl Model {
         let run_script = self.settings.borrow().run_step.clone();
 
         self.code_runner.please_run(
-            self.current_problem().examples.clone(),
+            self.current_problem().test_cases.clone(),
             compile_script,
             run_script,
         )
@@ -156,7 +169,7 @@ impl Model {
             return false;
         };
 
-        self.new_test_cases.set(true);
+        self.new_test_cases_arrived.set(true);
         let mut test_cases = self.test_cases.borrow_mut();
 
         for RunResponse { id, status } in updates.into_iter() {
@@ -238,24 +251,24 @@ impl Model {
         }
     }
 
-    pub fn test_cases(&self) -> Vec<TestCaseStatus> {
+    pub fn get_test_cases(&self) -> Vec<TestCaseStatus> {
         self.update_test_cases();
         self.test_cases.borrow().clone()
     }
 
-    pub fn last_failed_test_case(&self) -> Option<(usize, TestCaseStatus)> {
-        self.test_cases
-            .borrow()
-            .iter()
-            .enumerate()
-            .filter(|(_, tc)| tc.is_err())
-            .map(|(n, tc)| (n, tc.clone()))
-            .next()
+    pub fn details_for_selected_test_case(&self) -> (usize, TestCaseStatus) {
+        let selected_id = self.selected_test_case.get();
+        print!("Slected id: {selected_id}");
+        (selected_id, self.test_cases.borrow().get(selected_id).unwrap().clone())
+    }
+    
+    pub fn check_for_changes(&self) -> bool {
+        let changes = self.new_test_cases_arrived.get();
+        self.new_test_cases_arrived.set(false);
+        changes
     }
 
-    pub fn check_for_changes(&self) -> bool {
-        let changes = self.new_test_cases.get();
-        self.new_test_cases.set(false);
-        changes
+    pub fn health_check(&self) {
+        self.code_runner.health_check();
     }
 }

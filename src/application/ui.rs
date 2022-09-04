@@ -14,7 +14,7 @@ pub use available_problems::AvailableProblems;
 pub use commands::CommandsView;
 pub use full_problem::FullProblem;
 pub use help::Help;
-pub use last_test_case::LastTestCaseView;
+pub use last_test_case::TestCaseView;
 pub use layouts::*;
 pub use problem_view::ProblemView;
 pub use test_case_table::TestCaseTable;

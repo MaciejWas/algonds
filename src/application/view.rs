@@ -27,7 +27,7 @@ impl View {
 
     pub fn get_cursor(&self) -> String {
         let sign = if self.model.settings.borrow().pretty {
-            " 🡆 "
+            " 🡆  "
         } else {
             " -> "
         };
@@ -71,15 +71,18 @@ impl View {
     }
 
     pub fn get_test_cases(&self) -> Vec<TestCaseStatus> {
-        self.model.update_test_cases();
-        self.model.test_cases()
+        self.model.get_test_cases()
     }
 
-    pub fn get_last_failed(&self) -> Option<(usize, TestCaseStatus)> {
-        self.model.last_failed_test_case()
+    pub fn details(&self) -> (usize, TestCaseStatus) {
+        self.model.details_for_selected_test_case()
     }
 
     pub fn check_for_changes(&self) -> bool {
         self.model.check_for_changes()
+    }
+
+    pub fn get_curr_failed_view(&self) -> usize {
+        self.model.selected_test_case.get()
     }
 }

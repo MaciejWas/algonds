@@ -1,12 +1,15 @@
+use crate::application::test_runner::to_string;
 use std::time::Duration;
 use crate::application::test_runner::RemoteRunner;
-use crate::application::Example;
+use crate::application::TestCase;
+use crate::application::common::TestCaseStatus;
 use crate::application::RunDetails;
 use crate::application::RunRequest;
 use crate::application::RunResponse;
 use std::sync::mpsc::SendError;
 use std::sync::mpsc::{channel, Receiver, Sender};
 
+#[derive(Debug)]
 pub struct CodeRunner {
     handle: std::thread::JoinHandle<std::result::Result<(), String>>,
     incoming: Receiver<RunResponse>,
@@ -15,36 +18,48 @@ pub struct CodeRunner {
 impl CodeRunner {
     pub fn please_run(
         &self,
-        examples: Vec<Example>,
+        test_cases: Vec<TestCase>,
         compile_script: String,
         run_script: String,
     ) -> Result<(), SendError<RunRequest>> {
-        if self.handle.is_finished() {
-            panic!("Shit!!");
-        }
+        
         self.outgoing.send(RunRequest::PleaseRun(RunDetails {
             compile_script,
             run_script,
-            examples,
+            test_cases,
         }))
     }
 
-    pub fn please_stop(&self) -> Result<(), SendError<RunRequest>> {
+    fn check_thread(&self) -> Result<(), String> {
         if self.handle.is_finished() {
-            panic!("Shit!!");
+            return Err("Thread which runs the test cases has died".into());
         }
-        self.outgoing.send(RunRequest::PleaseStop)
+        Ok(())
+    }
+
+    pub fn please_stop(&self) -> Result<(), String> {
+        
+        self.outgoing.send(RunRequest::PleaseStop).map_err(to_string)
     }
 
     pub fn get_updates(&self) -> Vec<RunResponse> {
-        if self.handle.is_finished() {
-            panic!("Shit!!");
+        if let Err(err_msg) = self.check_thread() {
+            
+            let status = TestCaseStatus::Err { err_msg };
+            return vec![ RunResponse {  id: 0, status} ]
         }
+
         let mut updates = Vec::new();
         while let Ok(response) = self.incoming.recv_timeout(Duration::from_millis(10)) {
+            
             updates.push(response)
         }
         updates
+    }
+
+    pub fn health_check(&self) {
+        self.check_thread().expect("OKAY SO THREAD IS DEAD");
+        println!("OK i guess");
     }
 }
 
@@ -53,9 +68,9 @@ impl Default for CodeRunner {
         let (to_main, from_runner) = channel();
         let (to_runner, from_main) = channel();
 
-        let handle = std::thread::spawn(move || {
-            RemoteRunner::new(from_main, to_main).run()
-        });
+        let mut runner = RemoteRunner::new(from_main, to_main);
+
+        let handle = std::thread::spawn(move || runner.run());
 
         Self {
             handle,

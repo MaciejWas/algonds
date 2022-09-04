@@ -1,9 +1,10 @@
 #![feature(test)]
+use crate::AfterEvent::Quit;
+use std::fs::File;
 use crate::application::ui::UIElement;
 use crate::AfterEvent::DoRefresh;
 use std::time::Duration;
 extern crate test;
-
 use crate::application::controller::AfterEvent;
 use clap;
 use clap::Parser;
@@ -27,20 +28,22 @@ mod interface;
 use application::AppState;
 use arguments::AppArgs;
 
+const EVENT_CHECK_DUR: Duration = Duration::from_millis(300);
+const LOG_FILE: &str = "./algonds.log";
+
 fn main() {
     let args = AppArgs::parse();
     let app = AppState::from(args);
 
-    // Setup terminal
     enable_raw_mode().unwrap();
     let mut stdout = io::stdout();
+
     execute!(stdout, EnterAlternateScreen).unwrap();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend).unwrap();
 
     let result = run_app(&mut terminal, app);
 
-    // Restore terminal
     disable_raw_mode().unwrap();
     execute!(
         terminal.backend_mut(),
@@ -52,19 +55,20 @@ fn main() {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Result<()> {
-    let mut action = AfterEvent::DoRefresh;
-    while !action.is_quit() {
+    let mut action = DoRefresh;
+    while action != Quit {
         if action == DoRefresh {
             terminal.draw(|frame| app.render(frame))?;
         }
 
-        let there_is_new_event = event::poll(Duration::from_millis(500)).unwrap_or(false);
-        if there_is_new_event {
-            let new_event = event::read()?;
-            action = app.react_to_event(new_event).or(action);
-        }
+        let there_is_a_new_event = event::poll(EVENT_CHECK_DUR).unwrap_or(false);
+        let new_action = if there_is_a_new_event {
+            app.react_to_event(event::read()?)
+        } else {
+            app.react_to_code_runner()
+        };
 
-        action = app.react_to_code_runner().or(action);
+        action = new_action.or(action);
     }
     Ok(())
 }

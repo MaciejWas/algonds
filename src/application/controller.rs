@@ -61,13 +61,15 @@ impl Controller for MainController {
     }
 
     fn react_to_event(&self, event: Event) -> AfterEvent {
-        self.model.update_test_cases();
-
         if let Event::Resize(_, _) = event {
             return DoRefresh;
         }
 
         if let Event::Key(key) = event {
+            if let KeyCode::PageUp = key.code {
+                self.model.health_check();
+            }
+
             let result = match self.model.menu.get() {
                 Menu::Help => self.handle_help_menu(),
                 Menu::Select => self.select_screen_controller.react_to_event(event),

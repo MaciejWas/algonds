@@ -1,4 +1,5 @@
-// use crate::application::AdditionalData::*;
+use tui::widgets::Paragraph;
+use tui::text::Spans;
 use serde::{Deserialize, Serialize};
 use tui::style::Color;
 use tui::style::Style;
@@ -11,7 +12,7 @@ pub enum Menu {
     Help,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum ProblemDataKind {
     TestCases,
     Commands,
@@ -42,17 +43,38 @@ pub struct Problem {
     pub problem_name: String,
     pub problem_statement: String,
     pub tags: Vec<String>,
-    pub examples: Vec<Example>,
+    pub test_cases: Vec<TestCase>,
     pub difficulty: Difficulty,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Example {
+pub struct TestCase {
+    pub id: usize,
     pub input: String,
     pub output: String,
 }
 
 impl TestCaseStatus {
+    pub fn into_detailed<'a>(self) -> Vec<Spans<'a>> {
+        match self {
+            Self::Pass { .. } => vec![Spans::from("Test case passed!")],
+            Self::Fail { expected, actual } => {
+                vec![
+                    Spans::from(Span::styled("Test failed!", Style::default().fg(Color::Red))),
+                    Spans::from("Expected: ".to_string() + &expected),
+                    Spans::from("Actual:   ".to_string() + &actual),
+                ]
+            }
+            Self::Running => vec![Spans::from("Test case is still running... (stderr/out directed to /tmp/algonds_stderr/out")],
+            Self::Cancelled => vec![Spans::from("Test case was cancelled")],
+            Self::NotRun => vec![Spans::from("Test case was not yet run")],
+            Self::Err { err_msg } => vec![
+                Spans::from("The following error occured:"),
+                Spans::from(err_msg)
+            ],
+        }
+    }
+
     pub fn into_span<'a>(self) -> Span<'a> {
         let text = match &self {
             Self::Pass { .. } => "🗹 Pass",
@@ -117,6 +139,13 @@ impl TestCaseStatus {
             _ => false,
         }
     }
+
+    pub fn is_fail(&self) -> bool {
+        match self {
+            Self::Fail { .. } => true,
+            _ => false
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -129,5 +158,5 @@ pub struct RunResponse {
 pub struct RunDetails {
     pub compile_script: String,
     pub run_script: String,
-    pub examples: Vec<Example>,
+    pub test_cases: Vec<TestCase>,
 }

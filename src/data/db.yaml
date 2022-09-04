@@ -6,11 +6,11 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
-
 
 - problem_name: Print "Hello, worlrwqed!" (tutorial)
   problem_statement: Hi! Thanks for using my app :) 
@@ -20,9 +20,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -30,14 +31,14 @@
   problem_statement: Hi! Thanks for using my app :) 
     After selecting interesting exercise you should provide path to the input file and the command you wish to compile your solution.
     When you think you solution is ready for run press 'r'.
-
   tags:
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -50,9 +51,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Hard
 
 
@@ -65,9 +67,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -80,9 +83,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -95,9 +99,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -111,9 +116,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: "Hi there!"
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -127,23 +133,31 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: "fsdaf232"
       output: "Hello, world!"
+      id: 0
     - input: "4234234"
       output: "Hello, world!"
+      id: 1
     - input: "ffsdfsd"
       output: "Hello, world!"
+      id: 2
     - input: "fdsf32"
       output: "Hello, world!"
+      id: 3
     - input: "fasdfweafj093"
       output: "Hello, world!"
+      id: 4
     - input: "fasdfweafj093"
       output: "Hello, world!"
+      id: 5
     - input: "fasdfweafj093"
       output: "Hello, world!"
+      id: 6
     - input: "fasdfweafj093"
       output: "Hello, world!"
+      id: 7
   difficulty: Easy
 
 
@@ -157,9 +171,10 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy
 
 
@@ -172,7 +187,8 @@
     - help
     - hello
     - world
-  examples:
+  test_cases:
     - input: ""
       output: "Hello, world!"
+      id: 0
   difficulty: Easy

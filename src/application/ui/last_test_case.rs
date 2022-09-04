@@ -10,32 +10,25 @@ use tui::{
     Frame,
 };
 
-pub struct LastTestCaseView {
-    last_failed: Option<(usize, TestCaseStatus)>,
+pub struct TestCaseView {
+    test_case: TestCaseStatus,
+    id: usize
 }
 
-impl UIElement for LastTestCaseView {
+impl UIElement for TestCaseView {
     type ExpectedLayout = ProblemScreenLayout;
 
     fn setup(view: &View) -> Self {
-        let last_failed = view.get_last_failed();
-        Self { last_failed }
+        let (id, test_case) = view.details();
+        Self { id, test_case }
     }
 
     fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
-        let widget = match self.last_failed {
-            Some((n, TestCaseStatus::Err { err_msg })) => Paragraph::new(Spans::from(vec![
-                Span::from(format!("Error processing test case {}:", n)),
-                Span::styled(err_msg, Style::default().fg(tui::style::Color::Red)),
-            ])),
-            _ => Paragraph::new(Span::styled(
-                "Good job! All tests passed (or just weren't run)",
-                Style::default()
-                    .fg(tui::style::Color::Green)
-                    .add_modifier(Modifier::BOLD),
-            )),
-        };
-
+        let mut lines = vec![Spans::from(format!("View of test case {}:", self.id)), Spans::from("")];
+        let mut details = self.test_case.into_detailed();
+        lines.append(&mut details);
+        
+        let widget = Paragraph::new(lines);
         frame.render_widget(widget, layout.data);
     }
 }

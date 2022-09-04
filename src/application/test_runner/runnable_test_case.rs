@@ -8,12 +8,18 @@ use crate::application::common::TestCaseStatus;
 
 const ZERO_SECS: Duration = Duration::from_secs(0);
 
+fn remove_whitespace(s: &str) -> String {
+    s.chars().filter(|c| !c.is_whitespace()).collect()
+}
+
+#[derive(Debug)]
 struct RunnableTestCaseInner {
     pub io: TestCaseIO,
     pub process: Child,
     pub start_time: Instant,
 }
 
+#[derive(Debug)]
 pub struct RunnableTestCase {
     pub id: usize,
     pub command_template: String,
@@ -45,7 +51,7 @@ impl RunnableTestCase {
     fn start_inner(&mut self) -> Result<(), String> {
         let io = TestCaseIO::new()?;
         let (stdout, stderr) = io.get_io()?;
-
+        
         let process = parse_command(format!("{} {}", self.command_template, self.arg))
             .map_err(|err| format!("{}", err))?
             .stdout(stdout)
@@ -102,7 +108,7 @@ impl RunnableTestCase {
         } = self;
 
         if let Some(err_msg) = error {
-            return Self::error_result(err_msg);
+            return Self::error_result(err_msg + &"(While handling the test case)");
         };
 
         let RunnableTestCaseInner {
@@ -124,8 +130,13 @@ impl RunnableTestCase {
             None => Self::error_result("Process has not finished but shuld have"),
             Some(status) => {
                 if status.success() {
-                    let stdout = io.get_stdout();
-                    if stdout == expected_stdout {
+                    let stdout = match io.get_stdout() {
+                        Ok(stdout) => stdout,
+                        Err(err_msg) => {
+                            return (TestCaseStatus::Err { err_msg: err_msg + &"(while cheching stdout)" }, time)
+                        }
+                    };
+                    if remove_whitespace(&stdout) == remove_whitespace(&expected_stdout) {
                         return (TestCaseStatus::Pass { actual: stdout }, time);
                     }
                     return (
@@ -137,8 +148,12 @@ impl RunnableTestCase {
                     );
                 }
 
-                let stderr = io.get_stderr();
-                (TestCaseStatus::Err { err_msg: stderr }, time)
+                let err_msg = match io.get_stderr() {
+                    Ok(stderr) => stderr,
+                    Err(err_msg) => err_msg,
+                };
+
+                return (TestCaseStatus::Err { err_msg }, time)
             }
         };
     }

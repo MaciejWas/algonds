@@ -1,6 +1,6 @@
 use crate::application::common::ProblemDataKind;
 use crate::application::ui::CommandsView;
-use crate::application::ui::LastTestCaseView;
+use crate::application::ui::TestCaseView;
 use crate::application::ui::ProblemScreenLayout;
 use crate::application::ui::ProblemView;
 use crate::application::ui::TestCaseTable;
@@ -16,7 +16,7 @@ use tui::Frame;
 
 enum ProblemData {
     TestCases(TestCaseTable),
-    LastFailedExample(LastTestCaseView),
+    LastFailed(TestCaseView),
     Commands(CommandsView),
 }
 
@@ -28,9 +28,8 @@ impl UIElement for ProblemData {
         match to_show {
             ProblemDataKind::TestCases => Self::TestCases(TestCaseTable::setup(&view)),
             ProblemDataKind::Commands => Self::Commands(CommandsView::setup(&view)),
-            ProblemDataKind::LastFailedExample => {
-                Self::LastFailedExample(LastTestCaseView::setup(&view))
-            }
+            ProblemDataKind::LastFailedExample => Self::LastFailed(TestCaseView::setup(&view))
+            
         }
     }
 
@@ -38,7 +37,7 @@ impl UIElement for ProblemData {
         match self {
             Self::TestCases(widget) => widget.render(frame, layout),
             Self::Commands(widget) => widget.render(frame, layout),
-            Self::LastFailedExample(widget) => widget.render(frame, layout),
+            Self::LastFailed(widget) => widget.render(frame, layout),
         }
     }
 }
@@ -83,7 +82,7 @@ impl<'a> UIElement for FullProblem<'a> {
                 Span::from("  |  "),
                 Span::from("[F]ailed tests "),
             ]),
-            ProblemData::LastFailedExample(_) => Spans::from(vec![
+            ProblemData::LastFailed(_) => Spans::from(vec![
                 Span::from(" [T]est cases"),
                 Span::from("  |  "),
                 Span::from("[S]etup:"),
