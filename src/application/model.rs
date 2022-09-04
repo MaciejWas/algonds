@@ -95,12 +95,16 @@ impl Model {
         self.list_state.clone()
     }
 
+    pub fn get_n_problems(&self) -> usize {
+        self.test_cases.borrow().len()
+    }
+
     pub fn select_next_tc(&self, up: bool) {
         let id = self.selected_test_case.get();
         let n_test_cases = self.test_cases.borrow().len();
         
         if up {
-            self.selected_test_case.set(std::cmp::max(id + 1, n_test_cases));
+            self.selected_test_case.set(std::cmp::min(id + 1, n_test_cases-1));
         } else if id > 0 {
             self.selected_test_case.set(id - 1);
         }
@@ -258,7 +262,6 @@ impl Model {
 
     pub fn details_for_selected_test_case(&self) -> (usize, TestCaseStatus) {
         let selected_id = self.selected_test_case.get();
-        print!("Slected id: {selected_id}");
         (selected_id, self.test_cases.borrow().get(selected_id).unwrap().clone())
     }
     

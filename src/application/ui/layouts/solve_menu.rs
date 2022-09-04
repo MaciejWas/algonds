@@ -26,8 +26,9 @@ impl From<Rect> for ProblemScreenLayout {
             .split(term_size);
 
         let problem_window = problem_and_data[0];
-        let problem_view = add_margin(problem_window);
         let data_window = problem_and_data[1];
+
+        let problem_view = add_margin(problem_window);
         let data = add_margin(data_window);
 
         ProblemScreenLayout {

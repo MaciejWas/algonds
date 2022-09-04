@@ -28,8 +28,8 @@ impl Controller for ProblemScreenController {
         if let Event::Key(key) = event {
             if self.model.problem_data_kind.get() == ProblemDataKind::LastFailedExample {
                 match key.code {
-                    KeyCode::Left => self.model.select_next_tc(true),
-                    KeyCode::Right => self.model.select_next_tc(false),
+                    KeyCode::Left => self.model.select_next_tc(false),
+                    KeyCode::Right => self.model.select_next_tc(true),
                     _ => {}
                 }
             }
@@ -39,7 +39,7 @@ impl Controller for ProblemScreenController {
                 KeyCode::Char('r') => self.edit(InputField::RunCommand),
                 KeyCode::Char('s') => self.display_under_problem(ProblemDataKind::Commands),
                 KeyCode::Char('t') => self.display_under_problem(ProblemDataKind::TestCases),
-                KeyCode::Char('f') => {
+                KeyCode::Char('d') => {
                     self.display_under_problem(ProblemDataKind::LastFailedExample)
                 }
                 KeyCode::Char('q') => self.change_menu(Menu::Select),

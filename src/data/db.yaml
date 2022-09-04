@@ -12,18 +12,31 @@
       id: 0
   difficulty: Easy
 
-- problem_name: Print "Hello, worlrwqed!" (tutorial)
-  problem_statement: Hi! Thanks for using my app :) 
-    After selecting interesting exercise you should provide path to the input file and the command you wish to compile your solution.
-    When you think you solutiofwerpowejrowepqrn is ready for run press 'r'.
+- problem_name: Time in human-readable format
+  problem_statement: Write a function, which takes a non-negative integer (seconds) as input and returns the time in a human-readable format (HH:MM:SS)
+    The maximum time never exceeds 359999 (99:59:59)
+    You can find some examples in the test fixtures.
   tags:
     - help
     - hello
     - world
   test_cases:
-    - input: ""
-      output: "Hello, world!"
+    - input: "90"
+      output: "00:01:30"
+      id: 3
+    - input: "0"
+      output: "00:00:00"
       id: 0
+    - input: "59"
+      output: "00:00:59"
+      id: 1
+    - input: "60"
+      output: "00:01:00"
+      id: 2
+    - input: "3600"
+      output: "01:00:00"
+      id: 2
+
   difficulty: Easy
 
 

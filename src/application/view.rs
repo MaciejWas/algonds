@@ -85,4 +85,8 @@ impl View {
     pub fn get_curr_failed_view(&self) -> usize {
         self.model.selected_test_case.get()
     }
+
+    pub fn get_n_problems(&self) -> usize {
+        self.model.get_n_problems()
+    }
 }

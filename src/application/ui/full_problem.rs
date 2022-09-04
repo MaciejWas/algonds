@@ -73,21 +73,21 @@ impl<'a> UIElement for FullProblem<'a> {
                 Span::from("  |  "),
                 Span::styled("[S]etup:", selected_style),
                 Span::from("  |  "),
-                Span::from("[F]ailed tests "),
+                Span::from("[D]etails "),
             ]),
             ProblemData::TestCases(_) => Spans::from(vec![
                 Span::styled(" [T]est cases", selected_style),
                 Span::from("  |  "),
                 Span::from("[S]etup:"),
                 Span::from("  |  "),
-                Span::from("[F]ailed tests "),
+                Span::from("[D]etails "),
             ]),
             ProblemData::LastFailed(_) => Spans::from(vec![
                 Span::from(" [T]est cases"),
                 Span::from("  |  "),
                 Span::from("[S]etup:"),
                 Span::from("  |  "),
-                Span::styled("[F]ailed tests ", selected_style),
+                Span::styled("[D]etails ", selected_style),
             ]),
         };
 
