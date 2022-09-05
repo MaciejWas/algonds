@@ -11,6 +11,7 @@ pub mod settings;
 mod test_runner;
 pub mod ui;
 pub mod view;
+mod input_handler;
 
 use common::*;
 use model::Model;

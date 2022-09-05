@@ -24,8 +24,8 @@
     - input: "90"
       output: "00:01:30"
       id: 3
-    - input: "0"
-      output: "00:00:00"
+    - input: "9"
+      output: "00:00:09"
       id: 0
     - input: "59"
       output: "00:00:59"
@@ -35,8 +35,10 @@
       id: 2
     - input: "3600"
       output: "01:00:00"
-      id: 2
-
+      id: 4
+    - input: "5"
+      output: "00:00:05"
+      id: 5
   difficulty: Easy
 
 
