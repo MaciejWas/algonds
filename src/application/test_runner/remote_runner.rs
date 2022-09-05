@@ -75,7 +75,7 @@ impl RemoteRunner {
 
         if current_test_case.has_finished() {
             let id: usize = current_test_case.id.clone();
-            let (status, _time_completed) = current_test_case.get_results();
+            let status = current_test_case.get_results();
             self.notify(id, status)?;
         } else {
             self.to_run.push_front(current_test_case);
@@ -100,7 +100,7 @@ impl RemoteRunner {
         } = run_details;
         self.to_run = test_cases
             .into_iter()
-            .map(|tc| RunnableTestCase::new(tc.id, run_script.clone(), tc.input, tc.output))
+            .map(|tc| RunnableTestCase::new(tc.id, tc.complexity, run_script.clone(), tc.input, tc.output))
             .collect();
 
         self.compile(compile_script)

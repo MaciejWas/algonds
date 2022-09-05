@@ -16,7 +16,6 @@ use tui::{
 
 mod application;
 mod arguments;
-mod complexity;
 mod interface;
 
 use application::AppState;

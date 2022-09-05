@@ -9,6 +9,7 @@ mod layouts;
 mod problem_view;
 mod test_case_details;
 mod test_case_table;
+mod performance;
 
 pub use available_problems::AvailableProblems;
 pub use commands::CommandsView;
@@ -18,6 +19,7 @@ pub use layouts::*;
 pub use problem_view::ProblemView;
 pub use test_case_details::TestCaseDetails;
 pub use test_case_table::TestCaseTable;
+pub use performance::PerformanceChart;
 
 pub trait UIElement {
     type ExpectedLayout;

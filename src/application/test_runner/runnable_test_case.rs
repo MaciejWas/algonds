@@ -22,6 +22,7 @@ struct RunnableTestCaseInner {
 #[derive(Debug)]
 pub struct RunnableTestCase {
     pub id: usize,
+    pub complexity: u32,
     pub command_template: String,
     pub arg: String,
     pub expected_stdout: String,
@@ -31,12 +32,13 @@ pub struct RunnableTestCase {
 }
 
 impl RunnableTestCase {
-    pub fn new(id: usize, command_template: String, arg: String, expected_stdout: String) -> Self {
+    pub fn new(id: usize, complexity: u32, command_template: String, arg: String, expected_stdout: String) -> Self {
         Self {
             id,
             command_template: command_template,
             arg: arg,
             expected_stdout,
+            complexity,
 
             error: None,
             inner: None,
@@ -92,16 +94,17 @@ impl RunnableTestCase {
         false
     }
 
-    fn error_result(err_msg: impl Into<String>) -> (TestCaseStatus, Duration) {
+    fn error_result(err_msg: impl Into<String>) -> TestCaseStatus {
         let err_msg = err_msg.into();
-        (TestCaseStatus::Err { err_msg }, ZERO_SECS)
+        TestCaseStatus::Err { err_msg }
     }
 
-    pub fn get_results(self) -> (TestCaseStatus, Duration) {
+    pub fn get_results(self) -> TestCaseStatus {
         let Self {
             id: _,
             command_template: _,
             arg: _,
+            complexity,
             expected_stdout,
             error,
             inner,
@@ -132,25 +135,17 @@ impl RunnableTestCase {
                 if status.success() {
                     let stdout = match io.get_stdout() {
                         Ok(stdout) => stdout,
-                        Err(err_msg) => {
-                            return (
-                                TestCaseStatus::Err {
-                                    err_msg: err_msg + &"(while cheching stdout)",
-                                },
-                                time,
-                            )
-                        }
+                        Err(err_msg) => return TestCaseStatus::Err { err_msg: err_msg + &"(while cheching stdout)"}
                     };
+
                     if remove_whitespace(&stdout) == remove_whitespace(&expected_stdout) {
-                        return (TestCaseStatus::Pass { actual: stdout }, time);
+                        return TestCaseStatus::Pass { time, complexity };
                     }
-                    return (
-                        TestCaseStatus::Fail {
+
+                    return TestCaseStatus::Fail {
                             expected: expected_stdout.clone(),
                             actual: stdout,
-                        },
-                        time,
-                    );
+                        }
                 }
 
                 let err_msg = match io.get_stderr() {
@@ -158,7 +153,7 @@ impl RunnableTestCase {
                     Err(err_msg) => err_msg,
                 };
 
-                return (TestCaseStatus::Err { err_msg }, time);
+                return TestCaseStatus::Err { err_msg };
             }
         };
     }

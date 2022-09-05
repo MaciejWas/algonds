@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use tui::{
     style::{Color, Style},
@@ -18,13 +20,14 @@ pub enum Menu {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub enum ProblemDataKind {
+pub enum ProblemDataTab {
     TestCases,
     Commands,
     Details,
+    Performance
 }
 
-impl Default for ProblemDataKind {
+impl Default for ProblemDataTab {
     fn default() -> Self {
         Self::Commands
     }
@@ -47,7 +50,6 @@ pub enum Difficulty {
 pub struct Problem {
     pub problem_name: String,
     pub problem_statement: String,
-    pub tags: Vec<String>,
     pub test_cases: Vec<TestCase>,
     pub difficulty: Difficulty,
 }
@@ -55,6 +57,7 @@ pub struct Problem {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TestCase {
     pub id: usize,
+    pub complexity: u32,
     pub input: String,
     pub output: String,
 }
@@ -79,6 +82,13 @@ fn into_span_inner(tcs: TestCaseStatus) -> Span<'static> {
 }
 
 impl TestCaseStatus {
+    pub fn is_pass(&self) -> bool {
+        match self {
+            Self::Pass { .. } => true,
+            _ => false
+        }
+    } 
+
     pub fn into_detailed<'a>(self) -> Vec<Spans<'a>> {
         match self {
             Self::Pass { .. } => vec![Spans::from("Test case passed!")],
@@ -139,7 +149,7 @@ pub enum RunRequest {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TestCaseStatus {
-    Pass { actual: String },
+    Pass { time: Duration, complexity: u32 },
     Fail { expected: String, actual: String },
     Err { err_msg: String },
     Cancelled,

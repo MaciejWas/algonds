@@ -3,6 +3,14 @@ use crate::application::{common::*, Model};
 use std::cell::RefCell;
 use std::rc::Rc;
 use tui::widgets::ListState;
+use std::cmp::Ordering;
+
+fn compare_complexity(a: &TestCaseStatus, b: &TestCaseStatus) -> Ordering {
+    match (a, b) {
+        (TestCaseStatus::Pass { time: _, complexity }, TestCaseStatus::Pass { time: _, complexity: complexity2 }) => complexity.cmp(complexity2),
+        _ => Ordering::Equal
+    }
+}
 
 pub struct View {
     model: Rc<Model>,
@@ -34,8 +42,8 @@ impl View {
         sign.to_string()
     }
 
-    pub fn curr_data(&self) -> ProblemDataKind {
-        self.model.problem_data_kind.get()
+    pub fn curr_data(&self) -> ProblemDataTab {
+        self.model.problem_data_tab.get()
     }
 
     pub fn curr_menu(&self) -> Menu {
@@ -84,5 +92,19 @@ impl View {
 
     pub fn get_n_problems(&self) -> usize {
         self.model.number_of_problems()
+    }
+
+    pub fn performance(&self) -> Vec<(f64, f64)> {
+        let mut test_cases = self.model.get_test_cases();
+        test_cases.sort_by(|a, b| compare_complexity(a, b));
+
+        let points = test_cases.into_iter()
+            .filter(TestCaseStatus::is_pass)
+            .map(|tc| match tc {
+            TestCaseStatus::Pass { time, complexity } => (complexity as f64, time.as_secs_f64()),
+            _ => (0., 0.)
+        }).collect();
+
+        points
     }
 }

@@ -1,6 +1,12 @@
-use crate::application::ui::layouts::SPLIT_HELP;
+use tui::layout::Constraint;
 use tui::layout::Layout;
 use tui::layout::Rect;
+
+const SPLIT_HELP: [Constraint; 3] = [
+    Constraint::Percentage(33),
+    Constraint::Percentage(33),
+    Constraint::Percentage(34),
+];
 
 #[derive(Clone, Copy)]
 pub struct HelpScreenLayout {
@@ -12,7 +18,10 @@ pub struct HelpScreenLayout {
 
 impl From<Rect> for HelpScreenLayout {
     fn from(term_size: Rect) -> Self {
-        let outer_window = Layout::default().margin(6).split(term_size)[0];
+        let outer_window = Layout::default()
+            .margin(3)
+            .constraints(vec![Constraint::Percentage(100)])
+            .split(term_size)[0];
         let fields = Layout::default()
             .constraints(SPLIT_HELP)
             .split(outer_window);

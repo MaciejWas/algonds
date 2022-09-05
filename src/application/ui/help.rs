@@ -9,6 +9,49 @@ use tui::{
     Frame,
 };
 
+
+#[memoize::memoize]
+fn create_general_help(_unit: ()) -> Paragraph<'static> {
+    let spans = vec![
+        Spans::from(bold("General help")),
+        Spans::from("  h - open help"),
+        Spans::from("  q - quit current menu"),
+        Spans::from("  ctrl + c - exit application"),
+        Spans::from(""),
+    ];
+    Paragraph::new(spans).wrap(Wrap { trim: false })
+}
+
+#[memoize::memoize]
+fn create_select_help(_unit: ()) -> Paragraph<'static> {
+    let spans = vec![
+        Spans::from(bold("When selecting problem")),
+        Spans::from("  up/down (k/j) - open help"),
+        Spans::from("  enter - select problem"),
+        Spans::from(""),
+    ];
+    Paragraph::new(spans).wrap(Wrap { trim: false })
+}
+
+#[memoize::memoize]
+fn create_solve_help(_unit: ()) -> Paragraph<'static> {
+    let spans = vec![
+        Spans::from(bold("When solving problem")),
+        Spans::from("  c - edit compile script"),
+        Spans::from("  r - edit run script"),
+        Spans::from("  enter - run all test cases"),
+        Spans::from("  backspace - cancel running test cases"),
+        Spans::from("  t - see status of test cases"),
+        Spans::from("  s - see run/compile scripts"),
+        Spans::from("  d - see test cases details"),
+        Spans::from("  p - see performance"),
+        Spans::from(""),
+    ];
+    Paragraph::new(spans).wrap(Wrap { trim: false })
+}
+
+
+
 fn bold<'a, T: Into<String>>(text: T) -> Span<'a> {
     Span::styled(
         text.into(),
@@ -16,54 +59,19 @@ fn bold<'a, T: Into<String>>(text: T) -> Span<'a> {
     )
 }
 
-pub struct Help<'a> {
-    general_help: Paragraph<'a>,
-    select_help: Paragraph<'a>,
-    solve_help: Paragraph<'a>,
+pub struct Help {
+    general_help: Paragraph<'static>,
+    select_help: Paragraph<'static>,
+    solve_help: Paragraph<'static>,
 }
 
-impl<'a> Help<'a> {
-    fn create_general_help() -> Paragraph<'a> {
-        let spans = vec![
-            Spans::from(bold("General help")),
-            Spans::from("  h - open help"),
-            Spans::from("  q - quit current menu"),
-            Spans::from("  ctrl + c - exit application"),
-            Spans::from(""),
-        ];
-        Paragraph::new(spans).wrap(Wrap { trim: false })
-    }
-
-    fn create_select_help() -> Paragraph<'a> {
-        let spans = vec![
-            Spans::from(bold("Select menu")),
-            Spans::from("  up/down (k/j) - open help"),
-            Spans::from("  enter - select problem"),
-            Spans::from(""),
-        ];
-        Paragraph::new(spans).wrap(Wrap { trim: false })
-    }
-
-    fn create_solve_help() -> Paragraph<'a> {
-        let spans = vec![
-            Spans::from(bold("Solve menu")),
-            Spans::from("  c - edit compile script"),
-            Spans::from("  r - edit run script"),
-            Spans::from("  enter - run all test cases"),
-            Spans::from("  d - see last run details"),
-            Spans::from(""),
-        ];
-        Paragraph::new(spans).wrap(Wrap { trim: false })
-    }
-}
-
-impl<'a> UIElement for Help<'a> {
+impl<'a> UIElement for Help {
     type ExpectedLayout = HelpScreenLayout;
 
     fn setup(_view: &View) -> Self {
-        let general_help = Self::create_general_help();
-        let select_help = Self::create_select_help();
-        let solve_help = Self::create_solve_help();
+        let general_help = create_general_help(());
+        let select_help = create_select_help(());
+        let solve_help = create_solve_help(());
         Self {
             general_help,
             select_help,

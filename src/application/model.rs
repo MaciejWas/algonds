@@ -1,4 +1,3 @@
-use crate::application::common::Menu;
 use crate::application::common::*;
 use crate::application::input_handler::InputHandler;
 use crate::application::test_runner::CodeRunner;
@@ -13,7 +12,7 @@ use tui::widgets::ListState;
 pub type Db = Vec<Rc<Problem>>;
 
 pub struct Model {
-    pub problem_data_kind: Cell<ProblemDataKind>,
+    pub problem_data_tab: Cell<ProblemDataTab>,
     pub input_handler: InputHandler,
     pub settings: RefCell<Settings>,
     pub menu: Cell<Menu>,
@@ -32,7 +31,7 @@ impl Model {
         list_state.select(Some(0));
 
         Rc::new(Model {
-            problem_data_kind: Cell::default(),
+            problem_data_tab: Cell::default(),
             db: Model::load(&settings.db_path),
             code_runner: CodeRunner::default(),
             input_handler: InputHandler::default(),

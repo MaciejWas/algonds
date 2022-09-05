@@ -13,12 +13,6 @@ pub use problem_layout::ProblemLayout;
 pub use select_menu::SelectScreenLayout;
 pub use solve_menu::ProblemScreenLayout;
 
-const SPLIT_HELP: [Constraint; 3] = [
-    Constraint::Percentage(33),
-    Constraint::Percentage(33),
-    Constraint::Percentage(33),
-];
-
 const SELECT_PROBLEM_WINDOWS_CONSTRAINTS: [Constraint; 2] =
     [Constraint::Percentage(40), Constraint::Percentage(50)];
 

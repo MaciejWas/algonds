@@ -6,7 +6,7 @@ use tui::layout::Direction;
 use tui::layout::Layout;
 use tui::layout::Rect;
 
-const SPLIT_70_30: [Constraint; 2] = [Constraint::Percentage(70), Constraint::Percentage(30)];
+const SPLIT_65_35: [Constraint; 2] = [Constraint::Percentage(65), Constraint::Percentage(35)];
 
 #[derive(Clone, Copy)]
 pub struct ProblemScreenLayout {
@@ -20,7 +20,7 @@ pub struct ProblemScreenLayout {
 impl From<Rect> for ProblemScreenLayout {
     fn from(term_size: Rect) -> ProblemScreenLayout {
         let problem_and_data = Layout::default()
-            .constraints(SPLIT_70_30)
+            .constraints(SPLIT_65_35)
             .direction(Direction::Vertical)
             .margin(4)
             .split(term_size);

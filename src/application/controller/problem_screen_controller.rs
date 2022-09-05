@@ -1,5 +1,5 @@
 use crate::application::{
-    common::{Direction, InputField, Menu, ProblemDataKind},
+    common::{Direction, InputField, Menu, ProblemDataTab},
     controller::input_controller::InputController,
     controller::AfterEvent,
     controller::AfterEvent::*,
@@ -26,7 +26,7 @@ impl Controller for ProblemScreenController {
         }
 
         if let Event::Key(key) = event {
-            if self.model.problem_data_kind.get() == ProblemDataKind::Details {
+            if self.model.problem_data_tab.get() == ProblemDataTab::Details {
                 match key.code {
                     KeyCode::Left => return self.select_prev_test_case(),
                     KeyCode::Right => return self.select_next_test_case(),
@@ -37,9 +37,10 @@ impl Controller for ProblemScreenController {
             return match key.code {
                 KeyCode::Char('c') => self.edit(InputField::CompileCommand),
                 KeyCode::Char('r') => self.edit(InputField::RunCommand),
-                KeyCode::Char('s') => self.display_under_problem(ProblemDataKind::Commands),
-                KeyCode::Char('t') => self.display_under_problem(ProblemDataKind::TestCases),
-                KeyCode::Char('d') => self.display_under_problem(ProblemDataKind::Details),
+                KeyCode::Char('s') => self.display_under_problem(ProblemDataTab::Commands),
+                KeyCode::Char('t') => self.display_under_problem(ProblemDataTab::TestCases),
+                KeyCode::Char('d') => self.display_under_problem(ProblemDataTab::Details),
+                KeyCode::Char('p') => self.display_under_problem(ProblemDataTab::Performance),
                 KeyCode::Char('q') => self.change_menu(Menu::Select),
                 KeyCode::Enter => self.run_test_cases(),
                 KeyCode::Backspace => self.cancel_test_cases(),
@@ -57,13 +58,13 @@ impl ProblemScreenController {
         DoRefresh
     }
 
-    fn display_under_problem(&self, problem_data_kind: ProblemDataKind) -> AfterEvent {
-        self.model.problem_data_kind.set(problem_data_kind);
+    fn display_under_problem(&self, problem_data_kind: ProblemDataTab) -> AfterEvent {
+        self.model.problem_data_tab.set(problem_data_kind);
         DoRefresh
     }
 
     fn edit(&self, field: InputField) -> AfterEvent {
-        self.display_under_problem(ProblemDataKind::Commands);
+        self.display_under_problem(ProblemDataTab::Commands);
         self.model.start_editing_field(field);
         DoRefresh
     }
