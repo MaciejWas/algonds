@@ -59,7 +59,6 @@ impl RemoteRunner {
 
     fn notify(&self, id: usize, status: TestCaseStatus) -> Result<(), String> {
         let response = RunResponse { id, status };
-
         self.outgoing.send(response).map_err(to_string)
     }
 
@@ -101,8 +100,7 @@ impl RemoteRunner {
         } = run_details;
         self.to_run = test_cases
             .into_iter()
-            .enumerate()
-            .map(|(id, ex)| RunnableTestCase::new(id, run_script.clone(), ex.input, ex.output))
+            .map(|tc| RunnableTestCase::new(tc.id, run_script.clone(), tc.input, tc.output))
             .collect();
 
         self.compile(compile_script)

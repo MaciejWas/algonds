@@ -1,12 +1,14 @@
 - problem_name: Print "Hello, world!" (tutorial)
-  problem_statement: Hi! Thanks for using my app :) 
-    After selecting interesting exercise you should provide path to the input file and the command you wish to compile your solution.
-    When you think you solution is ready for run press 'r'.
+  problem_statement: After selecting interesting problem you should provide path to the input file and the command you wish to use to compile your solution
+    (See the [S]etup tab). When you think you solution is ready to run press Enter. If you wish to stop running press Backspace.
   tags:
     - help
     - hello
     - world
   test_cases:
+    - input: "1234567890"
+      output: "Hello, world!"
+      id: 1
     - input: ""
       output: "Hello, world!"
       id: 0

@@ -1,7 +1,7 @@
+use crate::application::ui::UIElement;
 use crate::application::common::*;
 use crate::application::ui::ProblemLayout;
 use crate::application::View;
-use crate::UIElement;
 use tui::widgets::Paragraph;
 use tui::widgets::Wrap;
 use tui::{

@@ -1,11 +1,6 @@
 use crate::application::common::ProblemDataKind;
-use crate::application::ui::CommandsView;
-use crate::application::ui::ProblemScreenLayout;
-use crate::application::ui::ProblemView;
-use crate::application::ui::TestCaseDetails;
-use crate::application::ui::TestCaseTable;
+use crate::application::ui::*;
 use crate::application::View;
-use crate::UIElement;
 use tui::backend::Backend;
 use tui::style::Style;
 use tui::text::Span;
@@ -15,12 +10,17 @@ use tui::widgets::Borders;
 use tui::Frame;
 
 #[memoize::memoize]
-fn make_title(tab: u8) -> Spans<'static> {
+fn make_problem_block(unit: ()) -> Block<'static> {
+    Block::default().borders(Borders::ALL).title("Solving")
+}
+
+#[memoize::memoize]
+fn make_problem_data_border(tab: u8) -> Block<'static> {
     let selected_style = Style::default()
         .add_modifier(tui::style::Modifier::BOLD)
         .fg(tui::style::Color::Green);
 
-    match tab {
+    let title = match tab {
         0 => Spans::from(vec![
             Span::styled(" [T]est cases", selected_style),
             Span::from("  |  "),
@@ -43,7 +43,8 @@ fn make_title(tab: u8) -> Spans<'static> {
             Span::styled("[D]etails ", selected_style),
         ]),
         _ => unreachable!(),
-    }
+    };
+    Block::default().borders(Borders::ALL).title(title)
 }
 
 enum ProblemData {
@@ -102,9 +103,8 @@ impl<'a> UIElement for FullProblem<'a> {
     where
         B: Backend,
     {
-        let title = make_title((&self.run_data).into());
-        let problem_view_border = Block::default().borders(Borders::ALL).title("Solving");
-        let problem_data_border = Block::default().borders(Borders::ALL).title(title);
+        let problem_view_border = make_problem_block(());
+        let problem_data_border = make_problem_data_border((&self.run_data).into());
 
         frame.render_widget(problem_view_border, layout.problem_window);
         frame.render_widget(problem_data_border, layout.data_window);

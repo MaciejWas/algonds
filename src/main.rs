@@ -1,11 +1,6 @@
-#![feature(test)]
-use crate::application::ui::UIElement;
-use crate::AfterEvent::DoRefresh;
-use crate::AfterEvent::Quit;
-use std::fs::File;
+use crate::application::controller::AfterEvent::*;
 use std::time::Duration;
-extern crate test;
-use crate::application::controller::AfterEvent;
+use std::io;
 use clap;
 use clap::Parser;
 use crossterm::{
@@ -13,7 +8,6 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use std::io;
 
 use tui::{
     backend::{Backend, CrosstermBackend},
