@@ -49,8 +49,8 @@ impl<'a> UIElement for AvailableProblems<'a> {
             )
             .highlight_symbol(&self.cursor);
 
-        frame.render_stateful_widget(list, layout.rows, &mut self.list_state.into_inner());
-        frame.render_widget(left_border, layout.left_window);
-        frame.render_widget(right_border, layout.right_window);
+        frame.render_stateful_widget(list, layout.problem_list, &mut self.list_state.into_inner());
+        frame.render_widget(left_border, layout.problem_list_outline);
+        frame.render_widget(right_border, layout.problem_preview_outline);
     }
 }

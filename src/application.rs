@@ -28,7 +28,7 @@ impl Default for AppState {
         let model = Model::new_ref(settings);
         let controller = MainController::setup(&model);
         let view = View::from(&model);
-
+    
         Self {
             view: Rc::new(view),
             controller: controller,

@@ -21,8 +21,8 @@ impl View {
         self.model.get_list_state()
     }
 
-    pub fn get_problems_to_select<'a>(&self) -> Vec<Rc<Problem>> {
-        self.model.get_problems_in_range(0, usize::MAX)
+    pub fn get_problems_to_select(&self) -> Vec<Rc<Problem>> {
+        self.model.get_problems()
     }
 
     pub fn get_cursor(&self) -> String {
@@ -74,7 +74,7 @@ impl View {
         self.model.get_test_cases()
     }
 
-    pub fn details(&self) -> (usize, TestCaseStatus) {
+    pub fn details_for_selected_test_case(&self) -> (usize, TestCaseStatus) {
         self.model.details_for_selected_test_case()
     }
 
@@ -82,11 +82,7 @@ impl View {
         self.model.check_for_changes()
     }
 
-    pub fn get_curr_failed_view(&self) -> usize {
-        self.model.selected_test_case.get()
-    }
-
     pub fn get_n_problems(&self) -> usize {
-        self.model.get_n_problems()
+        self.model.number_of_problems()
     }
 }

@@ -1,9 +1,13 @@
-use tui::widgets::Paragraph;
-use tui::text::Spans;
+use tui::{
+    text::{Span, Spans},
+    style::{Color, Style},
+};
 use serde::{Deserialize, Serialize};
-use tui::style::Color;
-use tui::style::Style;
-use tui::text::Span;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Direction {
+    Next, Previous
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Menu {
@@ -16,7 +20,7 @@ pub enum Menu {
 pub enum ProblemDataKind {
     TestCases,
     Commands,
-    LastFailedExample,
+    Details,
 }
 
 impl Default for ProblemDataKind {
@@ -54,6 +58,25 @@ pub struct TestCase {
     pub output: String,
 }
 
+#[memoize::memoize]
+fn into_span_inner(tcs: TestCaseStatus) -> Span<'static> {
+    let text = match &tcs {
+        TestCaseStatus::Pass { .. } => "🗹 Pass",
+        TestCaseStatus::Fail { .. } => "🗷 Fail",
+        TestCaseStatus::Running => "⌛ Running",
+        TestCaseStatus::Cancelled => "⚠ Cancelled",
+        TestCaseStatus::NotRun => "🯄 NotRun",
+        TestCaseStatus::Err { .. } => "‼ Error",
+    };
+    let style = match &tcs {
+        TestCaseStatus::Pass { .. } => Style::default().fg(Color::Green),
+        TestCaseStatus::Fail { .. } | TestCaseStatus::Err { .. } => Style::default().fg(Color::Red),
+        TestCaseStatus::Cancelled | TestCaseStatus::Running => Style::default().fg(Color::Yellow),
+        TestCaseStatus::NotRun => Style::default().fg(Color::Gray),
+    };
+    Span::styled(text, style)
+}
+
 impl TestCaseStatus {
     pub fn into_detailed<'a>(self) -> Vec<Spans<'a>> {
         match self {
@@ -75,22 +98,8 @@ impl TestCaseStatus {
         }
     }
 
-    pub fn into_span<'a>(self) -> Span<'a> {
-        let text = match &self {
-            Self::Pass { .. } => "🗹 Pass",
-            Self::Fail { .. } => "🗷 Fail",
-            Self::Running => "⌛ Running",
-            Self::Cancelled => "⚠ Cancelled",
-            Self::NotRun => "🯄 NotRun",
-            Self::Err { .. } => "‼ Error",
-        };
-        let style = match &self {
-            Self::Pass { .. } => Style::default().fg(Color::Green),
-            Self::Fail { .. } | Self::Err { .. } => Style::default().fg(Color::Red),
-            Self::Cancelled | Self::Running => Style::default().fg(Color::Yellow),
-            Self::NotRun => Style::default().fg(Color::Gray),
-        };
-        Span::styled(text, style)
+    pub fn into_span(self) -> Span<'static> {
+        into_span_inner(self)
     }
 }
 
@@ -122,7 +131,7 @@ pub enum RunRequest {
     PleaseStop,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TestCaseStatus {
     Pass { actual: String },
     Fail { expected: String, actual: String },
@@ -130,22 +139,6 @@ pub enum TestCaseStatus {
     Cancelled,
     Running,
     NotRun,
-}
-
-impl TestCaseStatus {
-    pub fn is_err(&self) -> bool {
-        match self {
-            Self::Err { .. } => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_fail(&self) -> bool {
-        match self {
-            Self::Fail { .. } => true,
-            _ => false
-        }
-    }
 }
 
 #[derive(Debug, Clone)]

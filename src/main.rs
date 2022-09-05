@@ -62,33 +62,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: AppState) -> io::Res
         }
 
         let there_is_a_new_event = event::poll(EVENT_CHECK_DUR).unwrap_or(false);
-        let new_action = if there_is_a_new_event {
+        action = if there_is_a_new_event {
             app.react_to_event(event::read()?)
         } else {
             app.react_to_code_runner()
         };
-
-        action = new_action.or(action);
     }
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::application::ui::UIElement;
-    use crate::AppState;
-    use test::Bencher;
-
-    #[bench]
-    fn setup_available_problems(b: &mut Bencher) {
-        let app = AppState::default();
-
-        b.iter(|| crate::application::ui::AvailableProblems::setup(&app.view))
-    }
-
-    #[bench]
-    fn setup_problem_preview(b: &mut Bencher) {
-        let app = AppState::default();
-        b.iter(|| crate::application::ui::ProblemView::setup(&app.view))
-    }
 }

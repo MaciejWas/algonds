@@ -1,5 +1,5 @@
 use crate::application::{
-    common::Menu, controller::AfterEvent, controller::AfterEvent::*, Controller, Model,
+    common::{Menu, Direction}, controller::AfterEvent, controller::AfterEvent::*, Controller, Model, 
 };
 use crossterm::event::{Event, KeyCode};
 use std::rc::Rc;
@@ -36,12 +36,12 @@ impl SelectScreenController {
     }
 
     fn next_problem(&self) -> AfterEvent {
-        self.model.select_next(true);
+        self.model.select_problem(Direction::Next);
         return DoRefresh;
     }
 
     fn prev_problem(&self) -> AfterEvent {
-        self.model.select_next(false);
+        self.model.select_problem(Direction::Previous);
         return DoRefresh;
     }
 }

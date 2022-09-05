@@ -9,7 +9,7 @@ use std::collections::VecDeque;
 use std::sync::mpsc::{Receiver, Sender};
 use super::to_string;
 
-const LOOP_WAIT: Duration = Duration::from_millis(100);
+const LOOP_WAIT: Duration = Duration::from_millis(50);
 
 pub struct RemoteRunner {
     incoming: Receiver<RunRequest>,

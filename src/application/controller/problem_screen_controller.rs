@@ -1,5 +1,5 @@
 use crate::application::{
-    common::{InputField, Menu, ProblemDataKind},
+    common::{InputField, Menu, ProblemDataKind, Direction},
     controller::input_controller::InputController,
     controller::AfterEvent,
     controller::AfterEvent::*,
@@ -26,10 +26,10 @@ impl Controller for ProblemScreenController {
         }
 
         if let Event::Key(key) = event {
-            if self.model.problem_data_kind.get() == ProblemDataKind::LastFailedExample {
+            if self.model.problem_data_kind.get() == ProblemDataKind::Details {
                 match key.code {
-                    KeyCode::Left => self.model.select_next_tc(false),
-                    KeyCode::Right => self.model.select_next_tc(true),
+                    KeyCode::Left => return self.select_prev_test_case(),
+                    KeyCode::Right => return self.select_next_test_case(),
                     _ => {}
                 }
             }
@@ -40,7 +40,7 @@ impl Controller for ProblemScreenController {
                 KeyCode::Char('s') => self.display_under_problem(ProblemDataKind::Commands),
                 KeyCode::Char('t') => self.display_under_problem(ProblemDataKind::TestCases),
                 KeyCode::Char('d') => {
-                    self.display_under_problem(ProblemDataKind::LastFailedExample)
+                    self.display_under_problem(ProblemDataKind::Details)
                 }
                 KeyCode::Char('q') => self.change_menu(Menu::Select),
                 KeyCode::Enter => self.run_test_cases(),
@@ -66,7 +66,7 @@ impl ProblemScreenController {
 
     fn edit(&self, field: InputField) -> AfterEvent {
         self.display_under_problem(ProblemDataKind::Commands);
-        self.model.edit_field(field);
+        self.model.start_editing_field(field);
         DoRefresh
     }
 
@@ -77,7 +77,17 @@ impl ProblemScreenController {
 
     fn run_test_cases(&self) -> AfterEvent {
         self.model.reset_test_cases();
-        self.model.run_test_cases().unwrap();
+        self.model.run_all_test_cases().unwrap();
+        DoRefresh
+    }
+
+    fn select_next_test_case(&self) -> AfterEvent {
+        self.model.select_test_case(Direction::Next);
+        DoRefresh
+    }
+
+    fn select_prev_test_case(&self) -> AfterEvent {
+        self.model.select_test_case(Direction::Previous);
         DoRefresh
     }
 }

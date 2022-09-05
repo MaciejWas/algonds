@@ -9,6 +9,7 @@ dependencies = [
  "clap",
  "crossterm 0.24.0",
  "linreg",
+ "memoize",
  "minreq",
  "serde",
  "serde_yaml",
@@ -239,6 +240,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "memoize"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7d5a102c66be8fb20cce036b79e3ff5293d904d0e6415f0a8e519d6a4e76e5b"
+dependencies = [
+ "lazy_static",
+ "memoize-inner",
+]
+
+[[package]]
+name = "memoize-inner"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "217a1e7f586ba063a4dc87a2dfb26f7700e150c9b378cb2aef511cd42013f8a3"
+dependencies = [
+ "lazy_static",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

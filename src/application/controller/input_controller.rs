@@ -30,7 +30,7 @@ impl Controller for InputController {
 
 impl InputController {
     fn cancel_input(&self) -> AfterEvent {
-        self.model.cancel_edit();
+        self.model.cancel_editing_field();
         DoRefresh
     }
 

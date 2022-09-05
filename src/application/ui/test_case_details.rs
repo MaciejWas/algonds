@@ -6,30 +6,30 @@ use tui::widgets::Paragraph;
 use tui::{
     backend::Backend,
     layout::Alignment,
-    style::{Modifier, Style, Color},
+    style::{Style, Color},
     text::{Span, Spans},
     Frame,
 };
 
-
-fn pretty_bar<'a>(curr: usize, max: usize) -> Spans<'a> {
-    let line: Vec<Span<'a>> = (0..max)
+#[memoize::memoize]
+fn pretty_bar(curr: usize, max: usize) -> Spans<'static> {
+    let line: Vec<Span<'static>> = (0..max)
         .map(|idx| if idx == curr { Span::styled(" ⬤ ", Style::default().fg(Color::Blue)) } else { Span::from(" ◯ ") } )
         .collect();
     Spans::from(line)
 }
 
-pub struct TestCaseView {
+pub struct TestCaseDetails {
     test_case: TestCaseStatus,
     id: usize,
     total: usize
 }
 
-impl UIElement for TestCaseView {
+impl UIElement for TestCaseDetails {
     type ExpectedLayout = ProblemScreenLayout;
 
     fn setup(view: &View) -> Self {
-        let (id, test_case) = view.details();
+        let (id, test_case) = view.details_for_selected_test_case();
         let total = view.get_n_problems();
         Self { id, test_case, total }
     }
