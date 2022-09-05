@@ -1,7 +1,4 @@
-use crate::application::{
-    common::Menu, controller::AfterEvent::*,
-    Model,
-};
+use crate::application::{common::Menu, controller::AfterEvent::*, Model};
 use crate::event::KeyEvent;
 use crossterm::event::{Event, KeyCode};
 use std::rc::Rc;

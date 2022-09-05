@@ -1,6 +1,6 @@
-use tui::layout::Layout;
 use crate::application::ui::ProblemLayout;
-use tui::{layout::{Rect, Constraint, Direction}};
+use tui::layout::Layout;
+use tui::layout::{Constraint, Direction, Rect};
 
 use super::{add_margin, get_footnote, split_left_right};
 

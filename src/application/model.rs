@@ -1,6 +1,6 @@
-use crate::application::input_handler::InputHandler;
 use crate::application::common::Menu;
 use crate::application::common::*;
+use crate::application::input_handler::InputHandler;
 use crate::application::test_runner::CodeRunner;
 use crate::application::Settings;
 use std::cell::Cell;
@@ -56,11 +56,11 @@ impl Model {
     pub fn select_test_case(&self, dir: Direction) {
         let id = self.selected_test_case.get();
         let n_test_cases = self.test_cases.borrow().len();
-        
+
         let next_id = if dir == Direction::Next {
-            std::cmp::min(id + 1, n_test_cases-1)
+            std::cmp::min(id + 1, n_test_cases - 1)
         } else {
-            std::cmp::max(id as i32 - 1 , 0) as usize
+            std::cmp::max(id as i32 - 1, 0) as usize
         };
 
         self.selected_test_case.set(next_id);
@@ -69,9 +69,9 @@ impl Model {
     pub fn select_problem(&self, dir: Direction) {
         let id = self.list_state.borrow().selected().unwrap_or(0);
         let n_problems = self.total_problems();
-        
+
         let next_id = if dir == Direction::Next {
-            std::cmp::min(id + 1, n_problems-1)
+            std::cmp::min(id + 1, n_problems - 1)
         } else if id > 0 {
             id - 1
         } else {
@@ -112,11 +112,8 @@ impl Model {
         let run_script = self.settings.borrow().run_step.clone();
         let test_cases = self.current_problem().test_cases.clone();
 
-        self.code_runner.please_run(
-            test_cases,
-            compile_script,
-            run_script,
-        )
+        self.code_runner
+            .please_run(test_cases, compile_script, run_script)
     }
 
     pub fn update_test_cases(&self) -> bool {
@@ -143,13 +140,8 @@ impl Model {
         self.db.get(id).unwrap().clone()
     }
 
-    pub fn get_problems(
-        &self,
-    ) -> Vec<Rc<Problem>> {
-        self.db
-            .iter()
-            .map(Rc::clone)
-            .collect()
+    pub fn get_problems(&self) -> Vec<Rc<Problem>> {
+        self.db.iter().map(Rc::clone).collect()
     }
 
     pub fn get_field(&self, field: InputField) -> String {
@@ -210,9 +202,12 @@ impl Model {
 
     pub fn details_for_selected_test_case(&self) -> (usize, TestCaseStatus) {
         let selected_id = self.selected_test_case.get();
-        (selected_id, self.test_cases.borrow().get(selected_id).unwrap().clone())
+        (
+            selected_id,
+            self.test_cases.borrow().get(selected_id).unwrap().clone(),
+        )
     }
-    
+
     pub fn check_for_changes(&self) -> bool {
         self.update_test_cases();
         let changes = self.new_test_cases_arrived.get();

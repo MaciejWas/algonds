@@ -1,5 +1,8 @@
 use crate::application::{
-    common::{Menu, Direction}, controller::AfterEvent, controller::AfterEvent::*, Controller, Model, 
+    common::{Direction, Menu},
+    controller::AfterEvent,
+    controller::AfterEvent::*,
+    Controller, Model,
 };
 use crossterm::event::{Event, KeyCode};
 use std::rc::Rc;

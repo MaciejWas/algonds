@@ -51,7 +51,7 @@ impl RunnableTestCase {
     fn start_inner(&mut self) -> Result<(), String> {
         let io = TestCaseIO::new()?;
         let (stdout, stderr) = io.get_io()?;
-        
+
         let process = parse_command(format!("{} {}", self.command_template, self.arg))
             .map_err(|err| format!("{}", err))?
             .stdout(stdout)
@@ -133,7 +133,12 @@ impl RunnableTestCase {
                     let stdout = match io.get_stdout() {
                         Ok(stdout) => stdout,
                         Err(err_msg) => {
-                            return (TestCaseStatus::Err { err_msg: err_msg + &"(while cheching stdout)" }, time)
+                            return (
+                                TestCaseStatus::Err {
+                                    err_msg: err_msg + &"(while cheching stdout)",
+                                },
+                                time,
+                            )
                         }
                     };
                     if remove_whitespace(&stdout) == remove_whitespace(&expected_stdout) {
@@ -153,7 +158,7 @@ impl RunnableTestCase {
                     Err(err_msg) => err_msg,
                 };
 
-                return (TestCaseStatus::Err { err_msg }, time)
+                return (TestCaseStatus::Err { err_msg }, time);
             }
         };
     }

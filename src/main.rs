@@ -1,8 +1,8 @@
 #![feature(test)]
-use crate::AfterEvent::Quit;
-use std::fs::File;
 use crate::application::ui::UIElement;
 use crate::AfterEvent::DoRefresh;
+use crate::AfterEvent::Quit;
+use std::fs::File;
 use std::time::Duration;
 extern crate test;
 use crate::application::controller::AfterEvent;
@@ -45,10 +45,7 @@ fn main() {
     let result = run_app(&mut terminal, app);
 
     disable_raw_mode().unwrap();
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-    ).unwrap();
+    execute!(terminal.backend_mut(), LeaveAlternateScreen,).unwrap();
     terminal.show_cursor().unwrap();
 
     result.unwrap();

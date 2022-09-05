@@ -1,12 +1,13 @@
-use tui::{
-    text::{Span, Spans},
-    style::{Color, Style},
-};
 use serde::{Deserialize, Serialize};
+use tui::{
+    style::{Color, Style},
+    text::{Span, Spans},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
-    Next, Previous
+    Next,
+    Previous,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -83,17 +84,22 @@ impl TestCaseStatus {
             Self::Pass { .. } => vec![Spans::from("Test case passed!")],
             Self::Fail { expected, actual } => {
                 vec![
-                    Spans::from(Span::styled("Test failed!", Style::default().fg(Color::Red))),
+                    Spans::from(Span::styled(
+                        "Test failed!",
+                        Style::default().fg(Color::Red),
+                    )),
                     Spans::from("Expected: ".to_string() + &expected),
                     Spans::from("Actual:   ".to_string() + &actual),
                 ]
             }
-            Self::Running => vec![Spans::from("Test case is still running... (stderr/out directed to /tmp/algonds_stderr/out")],
+            Self::Running => vec![Spans::from(
+                "Test case is still running... (stderr/out directed to /tmp/algonds_stderr/out",
+            )],
             Self::Cancelled => vec![Spans::from("Test case was cancelled")],
             Self::NotRun => vec![Spans::from("Test case was not yet run")],
             Self::Err { err_msg } => vec![
                 Spans::from("The following error occured:"),
-                Spans::from(err_msg)
+                Spans::from(err_msg),
             ],
         }
     }

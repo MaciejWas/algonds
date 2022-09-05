@@ -6,12 +6,12 @@ use view::View;
 
 pub mod common;
 pub mod controller;
+mod input_handler;
 pub mod model;
 pub mod settings;
 mod test_runner;
 pub mod ui;
 pub mod view;
-mod input_handler;
 
 use common::*;
 use model::Model;
@@ -28,7 +28,7 @@ impl Default for AppState {
         let model = Model::new_ref(settings);
         let controller = MainController::setup(&model);
         let view = View::from(&model);
-    
+
         Self {
             view: Rc::new(view),
             controller: controller,

@@ -1,5 +1,5 @@
 use crate::application::{
-    common::{InputField, Menu, ProblemDataKind, Direction},
+    common::{Direction, InputField, Menu, ProblemDataKind},
     controller::input_controller::InputController,
     controller::AfterEvent,
     controller::AfterEvent::*,
@@ -39,9 +39,7 @@ impl Controller for ProblemScreenController {
                 KeyCode::Char('r') => self.edit(InputField::RunCommand),
                 KeyCode::Char('s') => self.display_under_problem(ProblemDataKind::Commands),
                 KeyCode::Char('t') => self.display_under_problem(ProblemDataKind::TestCases),
-                KeyCode::Char('d') => {
-                    self.display_under_problem(ProblemDataKind::Details)
-                }
+                KeyCode::Char('d') => self.display_under_problem(ProblemDataKind::Details),
                 KeyCode::Char('q') => self.change_menu(Menu::Select),
                 KeyCode::Enter => self.run_test_cases(),
                 KeyCode::Backspace => self.cancel_test_cases(),

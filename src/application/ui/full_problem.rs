@@ -1,8 +1,8 @@
 use crate::application::common::ProblemDataKind;
 use crate::application::ui::CommandsView;
-use crate::application::ui::TestCaseDetails;
 use crate::application::ui::ProblemScreenLayout;
 use crate::application::ui::ProblemView;
+use crate::application::ui::TestCaseDetails;
 use crate::application::ui::TestCaseTable;
 use crate::application::View;
 use crate::UIElement;
@@ -42,7 +42,7 @@ fn make_title(tab: u8) -> Spans<'static> {
             Span::from("  |  "),
             Span::styled("[D]etails ", selected_style),
         ]),
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 
@@ -53,11 +53,11 @@ enum ProblemData {
 }
 
 impl Into<u8> for &ProblemData {
-    fn into(self) -> u8 { 
+    fn into(self) -> u8 {
         match self {
             ProblemData::TestCases(_) => 0,
             ProblemData::Commands(_) => 1,
-            ProblemData::Details(_) => 2
+            ProblemData::Details(_) => 2,
         }
     }
 }
@@ -70,7 +70,7 @@ impl UIElement for ProblemData {
         match to_show {
             ProblemDataKind::TestCases => Self::TestCases(TestCaseTable::setup(&view)),
             ProblemDataKind::Commands => Self::Commands(CommandsView::setup(&view)),
-            ProblemDataKind::Details => Self::Details(TestCaseDetails::setup(&view))
+            ProblemDataKind::Details => Self::Details(TestCaseDetails::setup(&view)),
         }
     }
 
