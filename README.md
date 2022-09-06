@@ -1,5 +1,16 @@
-# algonds
+<div align="center">
+  
+# Algonds
+
 Command line application for offline practice of competitive programming tasks. All contributions are welcome!
+
+[![Rust](https://github.com/MaciejWas/algonds/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/MaciejWas/algonds/actions/workflows/rust.yml)
+  
+</div>
+
+
+
+
 
 ## Demo
 <img src="./assets/demo1.gif">
