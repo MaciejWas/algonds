@@ -2,6 +2,7 @@ use crate::application::InputField;
 use std::cell::Cell;
 use std::cell::RefCell;
 
+#[derive(Default)]
 pub struct InputHandler {
     raw_input: RefCell<String>,
     direction: Cell<Option<InputField>>,
@@ -41,13 +42,5 @@ impl InputHandler {
     pub fn finish(&self) -> String {
         self.direction.set(None);
         self.raw_input.replace(String::new())
-    }
-}
-impl Default for InputHandler {
-    fn default() -> Self {
-        Self {
-            raw_input: RefCell::default(),
-            direction: Cell::default(),
-        }
     }
 }

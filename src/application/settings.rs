@@ -51,13 +51,13 @@ impl Settings {
         }
     }
 
-    fn load_from_web(link: &String) -> Settings {
+    fn load_from_web(link: &str) -> Settings {
         let response = minreq::get(link).send().unwrap();
         let serialized = response.as_str().unwrap();
         serde_yaml::from_str(serialized).unwrap()
     }
 
-    fn load_from_file(path: &String) -> Settings {
+    fn load_from_file(path: &str) -> Settings {
         let serialized = std::fs::read_to_string(path).unwrap();
         serde_yaml::from_str(&serialized).unwrap()
     }

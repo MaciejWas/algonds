@@ -102,7 +102,7 @@ impl Model {
         self.test_suite.run(compile_script, run_script);
     }
 
-    pub fn current_problem<'a>(&'a self) -> Rc<Problem> {
+    pub fn current_problem(&self) -> Rc<Problem> {
         let id: usize = self.list_state.borrow().selected().unwrap_or(0);
         self.db.get(id).unwrap().clone()
     }
@@ -127,12 +127,11 @@ impl Model {
         let mut settings = self.settings.borrow_mut();
         let field = self.input_handler.current_field();
         let finished_input = self.input_handler.finish();
-        match field {
-            Some(field) => match field {
+        if let Some(field) = field {
+            match field {
                 InputField::CompileCommand => settings.compilation_step = finished_input,
                 InputField::RunCommand => settings.run_step = finished_input,
-            },
-            None => {}
+            }
         }
     }
 
