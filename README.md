@@ -2,4 +2,4 @@
 Database of programming challenges along some TUI for interactive solving :)
 
 ## Demo
-![](https://gifyu.com/image/Sw4Ik)
+<img src="./assets/demo1.gif">
