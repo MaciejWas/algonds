@@ -2,15 +2,14 @@
   
 # Algonds
 
-Command line application for offline practice of competitive programming tasks. All contributions are welcome!
+Command line application for offline practice of competitive programming tasks, with correctness and performance analysis. 
+
+Every feedback/contribution is welcome ❤️
 
 [![Rust](https://github.com/MaciejWas/algonds/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/MaciejWas/algonds/actions/workflows/rust.yml)
 [![Clippy check](https://github.com/MaciejWas/algonds/actions/workflows/clippy_check.yaml/badge.svg?branch=main)](https://github.com/MaciejWas/algonds/actions/workflows/clippy_check.yaml)  
  
 </div>
-
-
-
 
 
 ## Demo
