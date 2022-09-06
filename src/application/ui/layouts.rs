@@ -13,9 +13,6 @@ pub use problem_layout::ProblemLayout;
 pub use select_menu::SelectScreenLayout;
 pub use solve_menu::ProblemScreenLayout;
 
-const SELECT_PROBLEM_WINDOWS_CONSTRAINTS: [Constraint; 2] =
-    [Constraint::Percentage(40), Constraint::Percentage(50)];
-
 const FOOTNOTE_CONSTRAINTS: [Constraint; 2] = [Constraint::Percentage(100), Constraint::Min(1)];
 
 const PROBLEM_PREVIEW_CONSTRAINTS: [Constraint; 3] = [
@@ -23,15 +20,6 @@ const PROBLEM_PREVIEW_CONSTRAINTS: [Constraint; 3] = [
     Constraint::Percentage(40),
     Constraint::Percentage(40),
 ];
-
-fn split_left_right(area: Rect) -> (Rect, Rect) {
-    let windows = Layout::default()
-        .constraints(SELECT_PROBLEM_WINDOWS_CONSTRAINTS)
-        .direction(Direction::Horizontal)
-        .margin(3)
-        .split(area);
-    (windows[0], windows[1])
-}
 
 fn split_problem_preview(area: Rect) -> (Rect, Rect, Rect) {
     let fields = Layout::default()

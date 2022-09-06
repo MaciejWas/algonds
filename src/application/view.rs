@@ -3,14 +3,6 @@ use crate::application::{common::*, Model};
 use std::cell::RefCell;
 use std::rc::Rc;
 use tui::widgets::ListState;
-use std::cmp::Ordering;
-
-fn compare_complexity(a: &TestCaseStatus, b: &TestCaseStatus) -> Ordering {
-    match (a, b) {
-        (TestCaseStatus::Pass { time: _, complexity }, TestCaseStatus::Pass { time: _, complexity: complexity2 }) => complexity.cmp(complexity2),
-        _ => Ordering::Equal
-    }
-}
 
 pub struct View {
     model: Rc<Model>,
@@ -90,20 +82,25 @@ impl View {
         self.model.check_for_changes()
     }
 
-    pub fn get_n_problems(&self) -> usize {
-        self.model.number_of_problems()
+    pub fn number_of_tests(&self) -> usize {
+        self.model.number_of_tests()
     }
 
     pub fn performance(&self) -> Vec<(f64, f64)> {
-        let mut test_cases = self.model.get_test_cases();
-        test_cases.sort_by(|a, b| compare_complexity(a, b));
+        let test_cases = self.model.get_test_cases();
 
-        let points = test_cases.into_iter()
-            .filter(TestCaseStatus::is_pass)
+        let mut points: Vec<(f64, f64)> = test_cases.into_iter()
             .map(|tc| match tc {
-            TestCaseStatus::Pass { time, complexity } => (complexity as f64, time.as_secs_f64()),
-            _ => (0., 0.)
-        }).collect();
+                TestCaseStatus::Pass { time, complexity } => Some((complexity as f64, time.as_secs_f64())),
+                TestCaseStatus::Fail { expected: _, actual: _, time, complexity } => Some((complexity as f64, time.as_secs_f64())),
+                _ => None
+            })
+            .filter(Option::is_some)
+            .map(Option::unwrap)
+            .map(|(n, t)| (n.log(2.0), t))
+            .collect();
+
+        points.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         points
     }

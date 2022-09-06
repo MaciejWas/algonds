@@ -2,7 +2,7 @@ use crate::application::ui::ProblemLayout;
 use tui::layout::Layout;
 use tui::layout::{Constraint, Direction, Rect};
 
-use super::{add_margin, get_footnote, split_left_right};
+use super::{add_margin, get_footnote};
 
 const SPLIT_70_30: [Constraint; 2] = [Constraint::Percentage(70), Constraint::Percentage(30)];
 

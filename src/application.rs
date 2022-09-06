@@ -12,6 +12,7 @@ pub mod settings;
 mod test_runner;
 pub mod ui;
 pub mod view;
+mod test_suite;
 
 use common::*;
 use model::Model;

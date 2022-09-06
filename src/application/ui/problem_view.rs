@@ -41,9 +41,9 @@ impl<'a> UIElement for ProblemView<'a> {
     fn setup(view: &View) -> Self {
         let problem = view.current_problem();
         let fst_example = problem.test_cases.get(0).unwrap();
-        let title = Paragraph::new(Spans::from(bold(problem.problem_name.clone())))
+        let title = Paragraph::new(Spans::from(bold(problem.name.clone())))
             .alignment(tui::layout::Alignment::Center);
-        let statement = Paragraph::new(Spans::from(text(problem.problem_statement.clone())))
+        let statement = Paragraph::new(Spans::from(text(problem.statement.clone())))
             .wrap(Wrap { trim: false });
         let example = test_case(fst_example).wrap(Wrap { trim: false });
 

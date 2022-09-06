@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use tui::{
@@ -48,8 +47,8 @@ pub enum Difficulty {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Problem {
-    pub problem_name: String,
-    pub problem_statement: String,
+    pub name: String,
+    pub statement: String,
     pub test_cases: Vec<TestCase>,
     pub difficulty: Difficulty,
 }
@@ -60,16 +59,17 @@ pub struct TestCase {
     pub complexity: u32,
     pub input: String,
     pub output: String,
+    pub is_stress_test: bool,
 }
 
 #[memoize::memoize]
 fn into_span_inner(tcs: TestCaseStatus) -> Span<'static> {
     let text = match &tcs {
-        TestCaseStatus::Pass { .. } => "🗹 Pass",
-        TestCaseStatus::Fail { .. } => "🗷 Fail",
+        TestCaseStatus::Pass { .. } => "🗹 Passed",
+        TestCaseStatus::Fail { .. } => "🗷 Failed",
         TestCaseStatus::Running => "⌛ Running",
         TestCaseStatus::Cancelled => "⚠ Cancelled",
-        TestCaseStatus::NotRun => "🯄 NotRun",
+        TestCaseStatus::NotRun => "🯄 Not Run",
         TestCaseStatus::Err { .. } => "‼ Error",
     };
     let style = match &tcs {
@@ -82,17 +82,10 @@ fn into_span_inner(tcs: TestCaseStatus) -> Span<'static> {
 }
 
 impl TestCaseStatus {
-    pub fn is_pass(&self) -> bool {
-        match self {
-            Self::Pass { .. } => true,
-            _ => false
-        }
-    } 
-
     pub fn into_detailed<'a>(self) -> Vec<Spans<'a>> {
         match self {
             Self::Pass { .. } => vec![Spans::from("Test case passed!")],
-            Self::Fail { expected, actual } => {
+            Self::Fail { expected, actual, time: _, complexity: _ } => {
                 vec![
                     Spans::from(Span::styled(
                         "Test failed!",
@@ -150,7 +143,7 @@ pub enum RunRequest {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TestCaseStatus {
     Pass { time: Duration, complexity: u32 },
-    Fail { expected: String, actual: String },
+    Fail { expected: String, actual: String, time: Duration, complexity: u32 },
     Err { err_msg: String },
     Cancelled,
     Running,

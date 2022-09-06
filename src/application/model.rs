@@ -1,12 +1,12 @@
+use crate::application::test_suite::TestSuite;
+use crate::data::load;
 use crate::application::common::*;
 use crate::application::input_handler::InputHandler;
-use crate::application::test_runner::CodeRunner;
 use crate::application::Settings;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::iter::Iterator;
 use std::rc::Rc;
-use std::sync::mpsc::SendError;
 use tui::widgets::ListState;
 
 pub type Db = Vec<Rc<Problem>>;
@@ -19,9 +19,7 @@ pub struct Model {
     pub selected_test_case: Cell<usize>,
 
     db: Db,
-    code_runner: CodeRunner,
-    new_test_cases_arrived: Cell<bool>,
-    test_cases: RefCell<Vec<TestCaseStatus>>,
+    test_suite: TestSuite,
     list_state: RefCell<ListState>,
 }
 
@@ -32,14 +30,12 @@ impl Model {
 
         Rc::new(Model {
             problem_data_tab: Cell::default(),
-            db: Model::load(&settings.db_path),
-            code_runner: CodeRunner::default(),
+            db: load(&settings.db_path),
             input_handler: InputHandler::default(),
             settings: RefCell::new(settings.clone()),
             menu: Cell::default(),
-            test_cases: RefCell::default(),
+            test_suite: TestSuite::new(),
             list_state: RefCell::new(list_state),
-            new_test_cases_arrived: Cell::default(),
             selected_test_case: Cell::default(),
         })
     }
@@ -48,13 +44,13 @@ impl Model {
         self.list_state.clone()
     }
 
-    pub fn number_of_problems(&self) -> usize {
-        self.test_cases.borrow().len()
+    pub fn number_of_tests(&self) -> usize {
+        self.test_suite.number_of_tests()
     }
 
     pub fn select_test_case(&self, dir: Direction) {
         let id = self.selected_test_case.get();
-        let n_test_cases = self.test_cases.borrow().len();
+        let n_test_cases = self.number_of_tests();
 
         let next_id = if dir == Direction::Next {
             std::cmp::min(id + 1, n_test_cases - 1)
@@ -88,14 +84,8 @@ impl Model {
     pub fn go_to(&self, menu: Menu) {
         self.menu.set(menu);
         if menu == Menu::Solve {
-            self.reset_test_cases()
+            self.test_suite.set_test_cases_from(self.current_problem())
         }
-    }
-
-    pub fn reset_test_cases(&self) {
-        let mut test_cases = self.test_cases.borrow_mut();
-        let n = self.current_problem().test_cases.len();
-        *test_cases = vec![TestCaseStatus::default(); n]
     }
 
     pub fn cancel_editing_field(&self) {
@@ -103,35 +93,13 @@ impl Model {
     }
 
     pub fn cancel_run(&self) {
-        self.code_runner.please_stop().unwrap();
+        self.test_suite.stop();
     }
 
-    pub fn run_all_test_cases(&self) -> Result<(), SendError<RunRequest>> {
+    pub fn run_all_test_cases(&self) {
         let compile_script = self.settings.borrow().compilation_step.clone();
         let run_script = self.settings.borrow().run_step.clone();
-        let test_cases = self.current_problem().test_cases.clone();
-
-        self.code_runner
-            .please_run(test_cases, compile_script, run_script)
-    }
-
-    pub fn update_test_cases(&self) -> bool {
-        let updates = self.code_runner.get_updates();
-        if updates.len() == 0 {
-            return false;
-        };
-
-        self.new_test_cases_arrived.set(true);
-
-        let mut test_cases = self.test_cases.borrow_mut();
-        for RunResponse { id, status } in updates.into_iter() {
-            let to_edit = test_cases
-                .get_mut(id)
-                .unwrap_or_else(|| panic!("Could not apply update run details for example {id}"));
-            *to_edit = status;
-        }
-
-        true
+        self.test_suite.run(compile_script, run_script);
     }
 
     pub fn current_problem<'a>(&'a self) -> Rc<Problem> {
@@ -155,32 +123,6 @@ impl Model {
         self.db.len()
     }
 
-    pub fn load(path: &String) -> Db {
-        if Self::is_web_link(path) {
-            Self::load_from_web(path)
-        } else {
-            Self::load_from_file(path)
-        }
-    }
-
-    fn is_web_link(text: &String) -> bool {
-        text.starts_with("http")
-    }
-
-    fn load_from_web(link: &String) -> Db {
-        let response = minreq::get(link).send().unwrap();
-        let serialized = response.as_str().unwrap();
-        let owned: Vec<Problem> = serde_yaml::from_str(serialized).unwrap();
-        owned.into_iter().map(|x| Rc::new(x)).collect()
-    }
-
-    fn load_from_file(path: &String) -> Db {
-        let serialized =
-            std::fs::read_to_string(path).expect("Something went wrong reading the file");
-        let problems: Vec<Problem> = serde_yaml::from_str(&serialized).unwrap();
-        problems.into_iter().map(Rc::new).collect()
-    }
-
     pub fn finish_edit(&self) {
         let mut settings = self.settings.borrow_mut();
         let field = self.input_handler.current_field();
@@ -195,26 +137,25 @@ impl Model {
     }
 
     pub fn get_test_cases(&self) -> Vec<TestCaseStatus> {
-        self.update_test_cases();
-        self.test_cases.borrow().clone()
+        self.test_suite.get_test_cases()
     }
 
     pub fn details_for_selected_test_case(&self) -> (usize, TestCaseStatus) {
         let selected_id = self.selected_test_case.get();
         (
             selected_id,
-            self.test_cases.borrow().get(selected_id).unwrap().clone(),
+            self.test_suite.get_nth_test_case(selected_id)
         )
     }
 
     pub fn check_for_changes(&self) -> bool {
-        self.update_test_cases();
-        let changes = self.new_test_cases_arrived.get();
-        self.new_test_cases_arrived.set(false);
-        changes
+        self.test_suite.check_for_changes()
+    }
+
+    pub fn kill_all_processes(&self) {
+        self.test_suite.stop()
     }
 
     pub fn health_check(&self) {
-        self.code_runner.health_check();
     }
 }

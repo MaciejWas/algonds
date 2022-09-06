@@ -27,7 +27,7 @@ impl<'a> UIElement for AvailableProblems<'a> {
         let problems: Vec<Rc<Problem>> = view.get_problems_to_select();
         let items = problems
             .into_iter()
-            .map(|prob| ListItem::new(Spans::from(Span::from(prob.problem_name.clone()))))
+            .map(|prob| ListItem::new(Spans::from(Span::from(prob.name.clone()))))
             .collect();
         Self {
             items,

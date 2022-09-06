@@ -85,10 +85,11 @@ impl RemoteRunner {
     }
 
     fn abort_curr_run(&mut self) -> Result<(), String> {
-        for test_case in &self.to_run {
+        let old_test_cases = std::mem::replace(&mut self.to_run, VecDeque::new());
+        for test_case in old_test_cases.into_iter() {
             self.notify(test_case.id, TestCaseStatus::Cancelled)?;
+            test_case.kill();
         }
-        self.to_run = VecDeque::new();
         Ok(())
     }
 

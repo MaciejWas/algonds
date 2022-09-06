@@ -54,11 +54,6 @@ impl CodeRunner {
         }
         updates
     }
-
-    pub fn health_check(&self) {
-        self.check_thread().expect("OKAY SO THREAD IS DEAD");
-        println!("OK i guess");
-    }
 }
 
 impl Default for CodeRunner {

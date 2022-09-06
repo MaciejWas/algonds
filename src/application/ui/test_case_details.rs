@@ -36,7 +36,7 @@ impl UIElement for TestCaseDetails {
 
     fn setup(view: &View) -> Self {
         let (id, test_case) = view.details_for_selected_test_case();
-        let total = view.get_n_problems();
+        let total = view.number_of_tests();
         Self {
             id,
             test_case,

@@ -1,12 +1,10 @@
 use std::{
     process::Child,
-    time::{Duration, Instant},
+    time::Instant,
 };
 
 use super::{parse_command, TestCaseIO};
 use crate::application::common::TestCaseStatus;
-
-const ZERO_SECS: Duration = Duration::from_secs(0);
 
 fn remove_whitespace(s: &str) -> String {
     s.chars().filter(|c| !c.is_whitespace()).collect()
@@ -17,6 +15,12 @@ struct RunnableTestCaseInner {
     pub io: TestCaseIO,
     pub process: Child,
     pub start_time: Instant,
+}
+
+impl RunnableTestCaseInner {
+    fn kill(&mut self) -> bool {
+        self.process.kill().is_ok()
+    }
 }
 
 #[derive(Debug)]
@@ -48,6 +52,10 @@ impl RunnableTestCase {
     pub fn start(&mut self) {
         let result = self.start_inner();
         self.error = result.err();
+    }
+
+    pub fn kill(self) {
+        self.inner.map(|mut i| i.kill());
     }
 
     fn start_inner(&mut self) -> Result<(), String> {
@@ -145,6 +153,8 @@ impl RunnableTestCase {
                     return TestCaseStatus::Fail {
                             expected: expected_stdout.clone(),
                             actual: stdout,
+                            time,
+                            complexity
                         }
                 }
 

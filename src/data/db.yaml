@@ -1,86 +1,102 @@
-- problem_name: Print "Hello, world!" (tutorial)
-  problem_statement: After selecting interesting problem you should provide path to the input file and the command you wish to use to compile your solution
+- name: Print "Hello, world!" (tutorial)
+  statement: After selecting interesting problem you should provide path to the input file and the command you wish to use to compile your solution
     (See the [S]etup tab). When you think you solution is ready to run press Enter. If you wish to stop running press Backspace.
   test_cases:
     - input: "1234567890"
       output: "Hello, world!"
       complexity: 0
       id: 1
+      is_stress_test: false
     - input: ""
       output: "Hello, world!"
       id: 0
       complexity: 0
+      is_stress_test: false
   difficulty: Easy
 
-- problem_name: Time in human-readable format
-  problem_statement: Write a program which will take a number of seconds as an argument and will print out the same duration in HH:MM:SS format.
+- name: Time in human-readable format
+  statement: Write a program which will take a number of seconds as an argument and will print out the same duration in HH:MM:SS format.
   test_cases:
     - input: "90"
       output: "00:01:30"
       complexity: 90
       id: 3
+      is_stress_test: false
     - input: "9"
       output: "00:00:09"
       complexity: 9
       id: 0
+      is_stress_test: false
     - input: "59"
       output: "00:00:59"
       complexity: 59
       id: 1
+      is_stress_test: false
     - input: "60"
       output: "00:01:00"
       complexity: 60
       id: 2
+      is_stress_test: false
     - input: "3600"
       output: "01:00:00"
       complexity: 3600
       id: 4
+      is_stress_test: false
     - input: "5"
       output: "00:00:05"
       complexity: 5
       id: 5
+      is_stress_test: false
     - input: "7263"
       output: "02:01:03"
       complexity: 7263
       id: 6
+      is_stress_test: false
   difficulty: Easy
 
-- problem_name: Longest common substring
-  problem_statement: Find the longest common substring between two strings
+- name: Longest common substring
+  statement: Find the longest common substring between two strings
   test_cases:
-    - input: "ebce abca"
-      output: "bc"
+    - input: "ebcdebc abcdabc"
+      output: "bcd"
       complexity: 4
       id: 1    
+      is_stress_test: false
 
     - input: "abc abc"
       output: "abc"
       complexity: 3
       id: 0
+      is_stress_test: false
 
     - input: "abcfabc abcfbca"
       output: "abcf"
       complexity: 7
       id: 2    
+      is_stress_test: false
 
     - input: "aaaabcaaaabcaaaaaaaa bcaaaaaaaaaaaa"
       output: "bcaaaaaaaa"
       id: 3
       complexity: 20
+      is_stress_test: false
 
     - input: "askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9 askfioasdj|fijqoi4jr2i41o|i341k23jp|o21j3o1jdmkqlwdmn|k2nd1ojo3j21op31|2940h381h49382hre132je921j0e9"
       output: "2940h381h49382hre132je921j0e9"
       id: 4
       complexity: 95
+      is_stress_test: false
 
     - input: "askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9 askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k2|3jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op3|12940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3|o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9"
       output: "askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k2"
       complexity: 285
       id: 5
+      is_stress_test: false
 
     - input: "askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jaskfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlaskfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlaskfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqaskfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqaskfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9lwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9lwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9wdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9wdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9dmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312|940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9 askfioasdjfijqoi4jr2|i41oi341k23jpo21j3o1j|askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2n|d1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr|2i41oi341k23jpo21j3o1jdmkqlaskfioasd|jfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2n|d1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkq|laskfioasdjfijqoi4jr2i41oi341k23jpo2|1j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h|49382hre132je921j0e9askfioasdjfijqo|i4jr2i41oi341k23jpo21j3o1|jdmkqaskfioasdjfijqoi4j|r2i41oi341k23jpo21j3o1jdmk|qlwdmnk2nd1ojo3j21op312940h381h49382hr|e132je921j0e9askfioasdj|fijqoi4jr2i41oi341k23jpo21j3o1jdmkqaskfioasd|jfijqoi4jr2i41oi341k23jpo21j3o1jdmkql|wdmnk2nd1ojo3j21op312940h381h49382hre132je921|j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9lwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9lwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9wdm|nk2nd1ojo3j21op312940h381h49382hre132je921j0e9askfioasd|jfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382hre132je921j0e9wdmnk2nd1|ojo3j21op312940h381h49382hre132je921j0e9askfioasdjfijqoi4jr2i41oi34|1k23jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op312940h381h49382h|re132je921j0e9dmkqlwdmnk2nd1ojo3j21op3|12940h381h49382hre132je921j0e9askfioasdjfi|jqoi4jr2i41oi341k23|jpo21j3o1jdmkqlwdmnk2nd1ojo3j21op31|2940h381h49382hre132je921j0e9askfioasdj|fijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwd|mnk2nd1ojo3j21op312940h381h49382hre132je921j0e9"
       output: "askfioasdjfijqoi4jr2i41oi341k23jpo21j3o1jdmkqlwdmnk2n"
       complexity: 1710
       id: 6
+      is_stress_test: false
       
   difficulty: Easy

@@ -75,8 +75,7 @@ impl ProblemScreenController {
     }
 
     fn run_test_cases(&self) -> AfterEvent {
-        self.model.reset_test_cases();
-        self.model.run_all_test_cases().unwrap();
+        self.model.run_all_test_cases();
         DoRefresh
     }
 

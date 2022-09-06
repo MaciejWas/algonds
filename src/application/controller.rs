@@ -95,4 +95,8 @@ impl MainController {
         self.model.go_to(new_menu);
         DoRefresh
     }
+
+    pub fn kill_all_processes(&self) {
+        self.model.kill_all_processes()
+    }
 }
