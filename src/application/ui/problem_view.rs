@@ -59,7 +59,7 @@ impl<'a> UIElement for ProblemView<'a> {
             title,
             statement,
             example,
-        } = layout.clone();
+        } = *layout;
         frame.render_widget(self.title, title);
         frame.render_widget(self.statement, statement);
         frame.render_widget(self.example, example);

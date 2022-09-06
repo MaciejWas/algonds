@@ -1,7 +1,6 @@
 use crate::application::controller::AfterEvent::*;
 use std::time::Duration;
 use std::io;
-use clap;
 use clap::Parser;
 use crossterm::{
     event::{self},

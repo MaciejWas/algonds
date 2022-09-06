@@ -39,8 +39,8 @@ impl RunnableTestCase {
     pub fn new(id: usize, complexity: u32, command_template: String, arg: String, expected_stdout: String) -> Self {
         Self {
             id,
-            command_template: command_template,
-            arg: arg,
+            command_template,
+            arg,
             expected_stdout,
             complexity,
 
@@ -119,7 +119,7 @@ impl RunnableTestCase {
         } = self;
 
         if let Some(err_msg) = error {
-            return Self::error_result(err_msg + &"(While handling the test case)");
+            return Self::error_result(err_msg +&"(While handling the test case)");
         };
 
         let RunnableTestCaseInner {

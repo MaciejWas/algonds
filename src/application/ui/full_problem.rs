@@ -86,10 +86,10 @@ impl UIElement for ProblemData {
     fn setup(view: &View) -> Self {
         let to_show = view.curr_data();
         match to_show {
-            ProblemDataTab::TestCases => Self::TestCases(TestCaseTable::setup(&view)),
-            ProblemDataTab::Commands => Self::Commands(CommandsView::setup(&view)),
-            ProblemDataTab::Details => Self::Details(TestCaseDetails::setup(&view)),
-            ProblemDataTab::Performance => Self::Performance(PerformanceChart::setup(&view))
+            ProblemDataTab::TestCases => Self::TestCases(TestCaseTable::setup(view)),
+            ProblemDataTab::Commands => Self::Commands(CommandsView::setup(view)),
+            ProblemDataTab::Details => Self::Details(TestCaseDetails::setup(view)),
+            ProblemDataTab::Performance => Self::Performance(PerformanceChart::setup(view))
         }
     }
 
@@ -129,6 +129,6 @@ impl<'a> UIElement for FullProblem<'a> {
         frame.render_widget(problem_data_border, layout.data_window);
 
         self.problem_data.render(frame, &layout.problem);
-        self.run_data.render(frame, &layout)
+        self.run_data.render(frame, layout)
     }
 }

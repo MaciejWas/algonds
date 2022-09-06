@@ -42,7 +42,7 @@ impl View {
         self.model.menu.get()
     }
 
-    pub fn current_problem<'a>(&self) -> Rc<Problem> {
+    pub fn current_problem(&self) -> Rc<Problem> {
         self.model.current_problem()
     }
 
@@ -53,21 +53,19 @@ impl View {
     pub fn compile_command_view(&self) -> String {
         if self.model.input_handler.is_in_input_mode() {
             if self.model.input_handler.current_field() == Some(InputField::CompileCommand) {
-                return self.model.input_handler.curr_input() + &"|";
+                return self.model.input_handler.curr_input() + "|";
             }
         }
 
-        return self.model.get_field(InputField::CompileCommand);
+        self.model.get_field(InputField::CompileCommand)
     }
 
     pub fn run_command_view(&self) -> String {
-        if self.model.input_handler.is_in_input_mode() {
-            if self.model.input_handler.current_field() == Some(InputField::RunCommand) {
-                return self.model.input_handler.curr_input() + &"|";
-            }
+        if self.model.input_handler.is_in_input_mode() && self.model.input_handler.current_field() == Some(InputField::RunCommand) {
+            return self.model.input_handler.curr_input() + "|";
         }
 
-        return self.model.get_field(InputField::RunCommand);
+        self.model.get_field(InputField::RunCommand)
     }
 
     pub fn get_test_cases(&self) -> Vec<TestCaseStatus> {
@@ -96,7 +94,7 @@ impl View {
                 _ => None
             })
             .filter(Option::is_some)
-            .map(Option::unwrap)
+            .flatten()
             .map(|(n, t)| (n.log(2.0), t))
             .collect();
 

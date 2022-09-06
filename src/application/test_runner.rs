@@ -22,7 +22,7 @@ fn parse_command(text: impl Into<String>) -> Result<Command, String> {
     }
 
     let command_and_args =
-        shlex::split(&whole_command).ok_or("Failed to parse command:\"{command}\"".to_string())?;
+        shlex::split(&whole_command).ok_or_else(|| "Failed to parse command:\"{command}\"".to_string())?;
     let mut command = Command::new(&command_and_args[0]);
     command.args(&command_and_args[1..]);
     Ok(command)

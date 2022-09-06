@@ -65,7 +65,7 @@ pub struct Help {
     solve_help: Paragraph<'static>,
 }
 
-impl<'a> UIElement for Help {
+impl UIElement for Help {
     type ExpectedLayout = HelpScreenLayout;
 
     fn setup(_view: &View) -> Self {

@@ -75,8 +75,10 @@ impl MainController {
             return Quit;
         }
 
-        if let KeyCode::Char('c') = key.code && key.modifiers == crossterm::event::KeyModifiers::CONTROL{
-            return Quit
+        if let KeyCode::Char('c') = key.code {
+            if key.modifiers == crossterm::event::KeyModifiers::CONTROL {
+                return Quit
+            }
         }
 
         if let KeyCode::Char('h') = key.code {

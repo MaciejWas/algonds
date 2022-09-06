@@ -32,7 +32,7 @@ impl TestSuite {
 
     pub fn update_test_cases(&self) -> bool {
         let updates = self.code_runner.get_updates();
-        if updates.len() == 0 {
+        if updates.is_empty() {
             return false;
         };
 

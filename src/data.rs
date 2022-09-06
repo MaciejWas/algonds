@@ -3,7 +3,7 @@ use crate::application::common::Problem;
 use crate::application::model::Db;
 use crate::application::common::TestCase;
 
-pub fn load(path: &String) -> Db {
+pub fn load(path: &str) -> Db {
     if is_web_link(path) {
         load_from_web(path)
     } else {
@@ -11,18 +11,18 @@ pub fn load(path: &String) -> Db {
     }
 }
 
-fn is_web_link(text: &String) -> bool {
+fn is_web_link(text: &str) -> bool {
     text.starts_with("http")
 }
 
-fn load_from_web(link: &String) -> Db {
+fn load_from_web(link: &str) -> Db {
     let response = minreq::get(link).send().unwrap();
     let serialized = response.as_str().unwrap();
     let owned: Vec<Problem> = serde_yaml::from_str(serialized).unwrap();
     owned.into_iter().map(Rc::new).collect()
 }
 
-fn load_from_file(path: &String) -> Db {
+fn load_from_file(path: &str) -> Db {
     let serialized =
         std::fs::read_to_string(path).expect("Something went wrong reading the file");
     let problems: Vec<Problem> = serde_yaml::from_str(&serialized).unwrap();
@@ -30,8 +30,8 @@ fn load_from_file(path: &String) -> Db {
 }
 
 
-pub fn generate_stress_tests_for(problem_name: &String, last_id: usize) -> Vec<TestCase> {
-    match problem_name.as_str() {
+pub fn generate_stress_tests_for(problem_name: &str, last_id: usize) -> Vec<TestCase> {
+    match problem_name {
         "Print \"Hello, world!\" (tutorial)" => stress_tests_for_hello_world(last_id),
         "Longest common substring" => stress_tests_for_lcs(last_id),
         _ => vec![]

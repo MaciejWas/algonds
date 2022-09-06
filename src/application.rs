@@ -42,8 +42,8 @@ impl From<AppArgs> for AppState {
         let settings = args
             .settings
             .as_ref()
-            .map(|settings_path| Settings::load(&settings_path))
-            .unwrap_or(Settings::from(&args));
+            .map(Settings::load)
+            .unwrap_or_else(|| Settings::from(&args));
 
         let model: Rc<Model> = Model::new_ref(settings);
         let controller = MainController::setup(&model);
