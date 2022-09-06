@@ -2,7 +2,7 @@
   
 # Algonds
 
-Command line application for offline practice of competitive programming tasks, with correctness and performance analysis. 
+Command line application for offline practice of competitive programming tasks with correctness and performance analysis. 
 
 Every feedback/contribution is welcome ❤️
 
