@@ -5,11 +5,17 @@ Command line application for offline practice of competitive programming tasks. 
 <img src="./assets/demo1.gif">
 
 ## How to run
+### For the first time
 Assuming Rust is installed:
 ```
   git clone https://github.com/MaciejWas/algonds
   cd algonds
   cargo run -- help
+```
+
+### Offline mode
+```
+  cargo run -- --db=./src/data/db.yaml
 ```
 
 ## How to add new problems
