@@ -74,7 +74,7 @@ impl RemoteRunner {
         }
 
         if current_test_case.has_finished() {
-            let id: usize = current_test_case.id.clone();
+            let id: usize = current_test_case.id;
             let status = current_test_case.get_results();
             self.notify(id, status)?;
         } else {
@@ -85,7 +85,7 @@ impl RemoteRunner {
     }
 
     fn abort_curr_run(&mut self) -> Result<(), String> {
-        let old_test_cases = std::mem::replace(&mut self.to_run, VecDeque::new());
+        let old_test_cases = std::mem::take(&mut self.to_run);
         for test_case in old_test_cases.into_iter() {
             self.notify(test_case.id, TestCaseStatus::Cancelled)?;
             test_case.kill();

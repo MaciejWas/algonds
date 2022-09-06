@@ -40,11 +40,11 @@ impl SelectScreenController {
 
     fn next_problem(&self) -> AfterEvent {
         self.model.select_problem(Direction::Next);
-        return DoRefresh;
+        DoRefresh
     }
 
     fn prev_problem(&self) -> AfterEvent {
         self.model.select_problem(Direction::Previous);
-        return DoRefresh;
+        DoRefresh
     }
 }

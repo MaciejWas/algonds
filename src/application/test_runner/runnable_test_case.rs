@@ -62,8 +62,7 @@ impl RunnableTestCase {
         let io = TestCaseIO::new()?;
         let (stdout, stderr) = io.get_io()?;
 
-        let process = parse_command(format!("{} {}", self.command_template, self.arg))
-            .map_err(|err| format!("{}", err))?
+        let process = parse_command(format!("{} {}", self.command_template, self.arg))?
             .stdout(stdout)
             .stderr(stderr)
             .spawn()
@@ -119,7 +118,7 @@ impl RunnableTestCase {
         } = self;
 
         if let Some(err_msg) = error {
-            return Self::error_result(err_msg +&"(While handling the test case)");
+            return Self::error_result(err_msg +"(While handling the test case)");
         };
 
         let RunnableTestCaseInner {
@@ -137,13 +136,13 @@ impl RunnableTestCase {
             Err(_) => return Self::error_result("Error checking exit status."),
         };
 
-        return match exit_status {
+        match exit_status {
             None => Self::error_result("Process has not finished but shuld have"),
             Some(status) => {
                 if status.success() {
                     let stdout = match io.get_stdout() {
                         Ok(stdout) => stdout,
-                        Err(err_msg) => return TestCaseStatus::Err { err_msg: err_msg + &"(while cheching stdout)"}
+                        Err(err_msg) => return TestCaseStatus::Err { err_msg: err_msg + "(while cheching stdout)"}
                     };
 
                     if remove_whitespace(&stdout) == remove_whitespace(&expected_stdout) {
@@ -151,7 +150,7 @@ impl RunnableTestCase {
                     }
 
                     return TestCaseStatus::Fail {
-                            expected: expected_stdout.clone(),
+                            expected: expected_stdout,
                             actual: stdout,
                             time,
                             complexity
@@ -163,8 +162,8 @@ impl RunnableTestCase {
                     Err(err_msg) => err_msg,
                 };
 
-                return TestCaseStatus::Err { err_msg };
+                TestCaseStatus::Err { err_msg }
             }
-        };
+        }
     }
 }

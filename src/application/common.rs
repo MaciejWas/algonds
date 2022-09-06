@@ -38,14 +38,14 @@ impl Default for Menu {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Difficulty {
     Easy,
     Medium,
     Hard,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Problem {
     pub name: String,
     pub statement: String,
@@ -53,7 +53,7 @@ pub struct Problem {
     pub difficulty: Difficulty,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TestCase {
     pub id: usize,
     pub complexity: u32,

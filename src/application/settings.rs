@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 const DB_ADDR: &str = "https://raw.githubusercontent.com/MaciejWas/algonds/main/src/data/db.yaml";
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Settings {
     pub db_path: String,
     pub compilation_step: String,

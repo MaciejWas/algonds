@@ -17,7 +17,7 @@ impl Controller for ProblemScreenController {
     fn setup(model_ref: &Rc<Model>) -> Self {
         Self {
             model: model_ref.clone(),
-            input_controller: InputController::setup(&model_ref),
+            input_controller: InputController::setup(model_ref),
         }
     }
     fn react_to_event(&self, event: Event) -> AfterEvent {

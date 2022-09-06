@@ -32,7 +32,7 @@ impl Default for AppState {
 
         Self {
             view: Rc::new(view),
-            controller: controller,
+            controller,
         }
     }
 }
@@ -51,7 +51,7 @@ impl From<AppArgs> for AppState {
 
         Self {
             view: Rc::new(view),
-            controller: controller,
+            controller,
         }
     }
 }

@@ -51,10 +51,8 @@ impl View {
     }
 
     pub fn compile_command_view(&self) -> String {
-        if self.model.input_handler.is_in_input_mode() {
-            if self.model.input_handler.current_field() == Some(InputField::CompileCommand) {
-                return self.model.input_handler.curr_input() + "|";
-            }
+        if self.model.input_handler.is_in_input_mode() && self.model.input_handler.current_field() == Some(InputField::CompileCommand) {
+            return self.model.input_handler.curr_input() + "|";
         }
 
         self.model.get_field(InputField::CompileCommand)

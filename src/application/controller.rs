@@ -38,8 +38,8 @@ impl Controller for MainController {
     fn setup(model: &Rc<Model>) -> Self {
         Self {
             model: Rc::clone(model),
-            select_screen_controller: SelectScreenController::setup(&model),
-            problem_screen_controller: ProblemScreenController::setup(&model),
+            select_screen_controller: SelectScreenController::setup(model),
+            problem_screen_controller: ProblemScreenController::setup(model),
         }
     }
 
@@ -65,7 +65,7 @@ impl Controller for MainController {
 
             return result;
         }
-        return NoRefresh;
+        NoRefresh
     }
 }
 
