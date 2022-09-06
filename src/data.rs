@@ -51,7 +51,7 @@ fn stress_tests_for_lcs(last_id: usize) -> Vec<TestCase> {
             id: last_id + 2,
             complexity: 1000 * 6,
             input: "abcde".repeat(1000) + " " + &"abcdez".repeat(1000),
-            output: "abcde".repeat(230),
+            output: "abcde".to_string(),
             is_stress_test: true,
         },
         TestCase {
