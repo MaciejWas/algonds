@@ -69,8 +69,8 @@ enum ProblemData {
     Performance(PerformanceChart)
 }
 
-impl Into<u8> for &ProblemData {
-    fn into(self) -> u8 {
+impl ProblemData {
+    fn code(&self) -> u8 {
         match self {
             ProblemData::TestCases(_) => 0,
             ProblemData::Commands(_) => 1,
@@ -123,7 +123,7 @@ impl<'a> UIElement for FullProblem<'a> {
         B: Backend,
     {
         let problem_view_border = make_problem_block(());
-        let problem_data_border = make_problem_data_border((&self.run_data).into());
+        let problem_data_border = make_problem_data_border(self.run_data.code());
 
         frame.render_widget(problem_view_border, layout.problem_window);
         frame.render_widget(problem_data_border, layout.data_window);

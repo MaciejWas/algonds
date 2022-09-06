@@ -26,24 +26,25 @@ impl From<&AppArgs> for Settings {
     fn from(args: &AppArgs) -> Self {
         let mut settings = Self::default();
 
-        args.db_path
-            .as_ref()
-            .map(|path| settings.db_path = path.clone());
-        args.compilation_step
-            .as_ref()
-            .map(|txt| settings.compilation_step = txt.clone());
-        args.run_step
-            .as_ref()
-            .map(|txt| settings.run_step = txt.clone());
+        if let Some(db_path) = &args.db_path {
+            settings.db_path = db_path.clone()
+        }
+
+        if let Some(comp_step) = &args.compilation_step {
+            settings.compilation_step = comp_step.clone()
+        }
+
+        if let Some(run_step) = &args.run_step {
+            settings.run_step = run_step.clone()
+        }
 
         settings.pretty = !args.disable_unicode;
-
         settings
     }
 }
 
 impl Settings {
-    pub fn load(path: &String) -> Settings {
+    pub fn load(path: &str) -> Settings {
         if is_web_link(path) {
             Self::load_from_web(path)
         } else {
@@ -63,6 +64,6 @@ impl Settings {
     }
 }
 
-fn is_web_link(text: &String) -> bool {
+fn is_web_link(text: &str) -> bool {
     text.starts_with("http")
 }

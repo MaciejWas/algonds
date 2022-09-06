@@ -42,7 +42,7 @@ impl From<AppArgs> for AppState {
         let settings = args
             .settings
             .as_ref()
-            .map(Settings::load)
+            .map(|settings_path| Settings::load(settings_path))
             .unwrap_or_else(|| Settings::from(&args));
 
         let model: Rc<Model> = Model::new_ref(settings);
