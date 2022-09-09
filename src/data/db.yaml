@@ -55,19 +55,18 @@
   difficulty: Easy
   
 - name: Processing incoming packages
-  statement: 
-    "Write a program which will take two arguments as an input:"
-    "   1. buffer length >= 1"
-    "   2. list of packages passed as a 3-tuple of (package_id, arrival_time, time_to_process)"
-    "and will return a list of (package_id, finished_processing_time) according to the following rules:"
-    "   1. Program will process packages in the order they came in and calculate finished_processing_time"
-    "   2. Program will keep a buffer and reject any incoming packages when buffer is full"
-    "NOTE - for a given package, finished_processing time should be calculated (instead of sleeping) based on previous packages and time_to_process."
-    " "
-    "In example below the first three packages arrive at the same time (2 second) so the third one is dropped (since the buffer is 2)"
+  statement: "Write a program which will take two arguments as an input:\n
+    \t1. buffer length >= 1\n
+    \t2. list of packages passed as a 3-tuple of (package_id, arrival_time, time_to_process)\n
+    and will return a list of (package_id, finished_processing_time) according to the following rules\n
+    \t1. Program will process packages in the order they came in and calculate finished_processing_time\n
+    \t2. Program will keep a buffer and reject any incoming packages when buffer is full\n
+    NOTE - for a given package, finished_processing time should be calculated (instead of sleeping) based on previous packages and time_to_process.\n
+    in example below the first three packages arrive at the same time (2 second) so the third one is dropped (since the buffer is 2)"
+  difficulty: Medium
   test_cases:
-    - input: "2 (0 2 3) (1 2 3) (2 2 3) (5 5 6)"
-      output: "(0 5) (1 8) ()"
+    - input: "2 (0 2 3) (1 2 3) (2 2 3) (3 10 6)"
+      output: "(0 5) (1 8) (3 16)"
       complexity: 4
       id: 0
       is_stress_test: false

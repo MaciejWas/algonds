@@ -43,7 +43,14 @@ impl<'a> UIElement for ProblemView<'a> {
         let fst_example = problem.test_cases.get(0).unwrap();
         let title = Paragraph::new(Spans::from(bold(problem.name.clone())))
             .alignment(tui::layout::Alignment::Center);
-        let statement = Paragraph::new(Spans::from(text(problem.statement.clone())))
+        
+        let statement_with_line_breaks: Vec<Spans> = problem.statement.clone()
+            .replace("\t", "    ")
+            .split("\n")
+            .map(|line| Spans::from(text(line.to_string())))
+            .collect();
+
+        let statement = Paragraph::new(statement_with_line_breaks)
             .wrap(Wrap { trim: false });
         let example = test_case(fst_example).wrap(Wrap { trim: false });
 
