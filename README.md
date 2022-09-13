@@ -26,7 +26,7 @@ Assuming Rust is installed:
 
 ### Offline mode
 ```
-  cargo run -- --db=./src/data/db.yaml run
+  cargo run -- --db-path=./src/data/db.yaml run
 ```
 
 ## How to add new problems
