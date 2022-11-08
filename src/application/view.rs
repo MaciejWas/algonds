@@ -39,7 +39,7 @@ impl View {
     }
 
     pub fn curr_menu(&self) -> Menu {
-        self.model.menu.get()
+        self.model.current_menu.get()
     }
 
     pub fn current_problem(&self) -> Rc<Problem> {

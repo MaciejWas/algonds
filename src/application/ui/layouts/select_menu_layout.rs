@@ -1,4 +1,4 @@
-use crate::application::ui::ProblemLayout;
+use crate::application::ui::ProblemStatementLayout;
 use tui::layout::Layout;
 use tui::layout::{Constraint, Direction, Rect};
 
@@ -12,7 +12,7 @@ pub struct SelectScreenLayout {
     pub problem_list: Rect,
 
     pub problem_preview_outline: Rect,
-    pub problem_preview: ProblemLayout,
+    pub problem_preview: ProblemStatementLayout,
     pub footnote: Rect,
 }
 
@@ -28,7 +28,7 @@ impl From<Rect> for SelectScreenLayout {
         let problem_list = add_margin(problem_list_outline);
 
         let problem_preview_outline = list_and_preview[1];
-        let problem_preview = ProblemLayout::from(problem_preview_outline);
+        let problem_preview = ProblemStatementLayout::from(problem_preview_outline);
         let footnote = get_footnote(term_size);
 
         SelectScreenLayout {

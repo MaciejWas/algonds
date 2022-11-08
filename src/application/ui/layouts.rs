@@ -3,17 +3,15 @@ use tui::layout::Direction;
 use tui::layout::Layout;
 use tui::layout::Rect;
 
-mod help_menu;
-mod problem_layout;
-mod select_menu;
-mod solve_menu;
+mod help_menu_layout;
+mod select_menu_layout;
+mod problem_menu_layout;
 
-pub use help_menu::HelpScreenLayout;
-pub use problem_layout::ProblemLayout;
-pub use select_menu::SelectScreenLayout;
-pub use solve_menu::ProblemScreenLayout;
+pub use help_menu_layout::HelpScreenLayout;
+pub use select_menu_layout::SelectScreenLayout;
+pub use problem_menu_layout::{ProblemMenuLayout, ProblemStatementLayout};
 
-const FOOTNOTE_CONSTRAINTS: [Constraint; 2] = [Constraint::Percentage(100), Constraint::Min(1)];
+const FOOTNOTE_CONSTRAINTS: [Constraint; 2] = [Constraint::Percentage(97), Constraint::Min(1)];
 
 const PROBLEM_PREVIEW_CONSTRAINTS: [Constraint; 3] = [
     Constraint::Min(1),

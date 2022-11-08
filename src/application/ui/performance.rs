@@ -1,6 +1,6 @@
 use tui::widgets::Axis;
 use tui::widgets::Chart;
-use crate::application::ui::ProblemScreenLayout;
+use crate::application::ui::ProblemMenuLayout;
 use crate::application::ui::UIElement;
 use crate::application::View;
 use tui::{
@@ -17,7 +17,7 @@ pub struct PerformanceChart {
 }
 
 impl UIElement for PerformanceChart {
-    type ExpectedLayout = ProblemScreenLayout;
+    type ExpectedLayout = ProblemMenuLayout;
 
     fn setup(view: &View) -> Self {
         let data = view.performance();
@@ -26,7 +26,7 @@ impl UIElement for PerformanceChart {
         }
     }
 
-    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemMenuLayout) {
         let points = self.data;
 
         if points.is_empty() {
@@ -58,6 +58,6 @@ impl UIElement for PerformanceChart {
                 Span::from("0.00"),
                 Span::from(format!("{:.2}", max_time))
             ]));
-        frame.render_widget(chart, layout.data);
+        frame.render_widget(chart, layout.problem_tabs);
     }
 }

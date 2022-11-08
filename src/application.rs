@@ -1,18 +1,18 @@
 use crate::arguments::*;
-use controller::Controller;
-use controller::MainController;
+use controller::{MainController, Controller};
 use std::rc::Rc;
 use view::View;
 
 pub mod common;
 pub mod controller;
-mod input_handler;
 pub mod model;
 pub mod settings;
-mod test_runner;
 pub mod ui;
 pub mod view;
+
 mod test_suite;
+mod test_runner;
+mod input_handler;
 
 use common::*;
 use model::Model;

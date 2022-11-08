@@ -1,6 +1,6 @@
 use crate::application::ui::UIElement;
 use crate::application::common::*;
-use crate::application::ui::ProblemLayout;
+use crate::application::ui::ProblemStatementLayout;
 use crate::application::View;
 use tui::widgets::Paragraph;
 use tui::widgets::Wrap;
@@ -36,7 +36,7 @@ pub struct ProblemView<'a> {
 }
 
 impl<'a> UIElement for ProblemView<'a> {
-    type ExpectedLayout = ProblemLayout;
+    type ExpectedLayout = ProblemStatementLayout;
 
     fn setup(view: &View) -> Self {
         let problem = view.current_problem();
@@ -54,8 +54,8 @@ impl<'a> UIElement for ProblemView<'a> {
         }
     }
 
-    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemLayout) {
-        let ProblemLayout {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemStatementLayout) {
+        let ProblemStatementLayout {
             title,
             statement,
             example,

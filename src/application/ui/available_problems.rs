@@ -4,6 +4,7 @@ use crate::application::ui::UIElement;
 use crate::application::View;
 use std::cell::RefCell;
 use std::rc::Rc;
+use tui::widgets::Paragraph;
 use tui::{
     backend::Backend,
     style::{Color, Modifier, Style},
@@ -52,5 +53,8 @@ impl<'a> UIElement for AvailableProblems<'a> {
         frame.render_stateful_widget(list, layout.problem_list, &mut self.list_state.into_inner());
         frame.render_widget(left_border, layout.problem_list_outline);
         frame.render_widget(right_border, layout.problem_preview_outline);
+        frame.render_widget(
+            Paragraph::new("q - quit,   h - help,   enter - select problem,   use arrows to navigate").alignment(tui::layout::Alignment::Center), 
+            layout.footnote)
     }
 }

@@ -3,10 +3,12 @@ use crate::data::load;
 use crate::application::common::*;
 use crate::application::input_handler::InputHandler;
 use crate::application::Settings;
+
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::iter::Iterator;
 use std::rc::Rc;
+
 use tui::widgets::ListState;
 
 pub type Db = Vec<Rc<Problem>>;
@@ -15,7 +17,7 @@ pub struct Model {
     pub problem_data_tab: Cell<ProblemDataTab>,
     pub input_handler: InputHandler,
     pub settings: RefCell<Settings>,
-    pub menu: Cell<Menu>,
+    pub current_menu: Cell<Menu>,
     pub selected_test_case: Cell<usize>,
 
     db: Db,
@@ -33,17 +35,18 @@ impl Model {
             db: load(&settings.db_path),
             input_handler: InputHandler::default(),
             settings: RefCell::new(settings.clone()),
-            menu: Cell::default(),
+            current_menu: Cell::default(),
             test_suite: TestSuite::new(),
             list_state: RefCell::new(list_state),
             selected_test_case: Cell::default(),
         })
     }
-
+    
+    /// State of the scrollable list of problems
     pub fn get_list_state(&self) -> RefCell<ListState> {
         self.list_state.clone()
     }
-
+    
     pub fn number_of_tests(&self) -> usize {
         self.test_suite.number_of_tests()
     }
@@ -82,7 +85,7 @@ impl Model {
     }
 
     pub fn go_to(&self, menu: Menu) {
-        self.menu.set(menu);
+        self.current_menu.set(menu);
         if menu == Menu::Solve {
             self.test_suite.set_test_cases_from(self.current_problem())
         }

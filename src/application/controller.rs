@@ -53,7 +53,7 @@ impl Controller for MainController {
                 self.model.health_check();
             }
 
-            let result = match self.model.menu.get() {
+            let result = match self.model.current_menu.get() {
                 Menu::Help => self.handle_help_menu(),
                 Menu::Select => self.select_screen_controller.react_to_event(event),
                 Menu::Solve => self.problem_screen_controller.react_to_event(event),

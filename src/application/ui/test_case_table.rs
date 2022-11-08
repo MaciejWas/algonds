@@ -1,5 +1,5 @@
 use crate::application::common::*;
-use crate::application::ui::ProblemScreenLayout;
+use crate::application::ui::ProblemMenuLayout;
 use crate::application::ui::UIElement;
 use crate::application::View;
 use tui::{
@@ -19,14 +19,14 @@ pub struct TestCaseTable {
 }
 
 impl UIElement for TestCaseTable {
-    type ExpectedLayout = ProblemScreenLayout;
+    type ExpectedLayout = ProblemMenuLayout;
 
     fn setup(view: &View) -> Self {
         let test_cases = view.get_test_cases();
         Self { test_cases }
     }
 
-    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemMenuLayout) {
         let display_statuses = self
             .test_cases
             .into_iter()
@@ -55,6 +55,6 @@ impl UIElement for TestCaseTable {
             .column_spacing(3)
             .widths(&constraints);
 
-        frame.render_widget(test_case_data, layout.data);
+        frame.render_widget(test_case_data, layout.problem_tabs);
     }
 }

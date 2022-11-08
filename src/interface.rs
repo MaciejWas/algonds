@@ -3,10 +3,11 @@ use crate::application::controller::AfterEvent;
 use crate::application::controller::Controller;
 use crate::application::ui;
 use crate::application::ui::HelpScreenLayout;
-use crate::application::ui::ProblemScreenLayout;
+use crate::application::ui::ProblemMenuLayout;
 use crate::application::ui::SelectScreenLayout;
 use crate::application::ui::UIElement;
 use crossterm::event::Event;
+use tui::widgets::Paragraph;
 use tui::{backend::Backend, Frame};
 
 use crate::application::AppState;
@@ -29,7 +30,7 @@ impl AppState {
 
     fn render_problem<B: Backend>(&mut self, frame: &mut Frame<B>) {
         let term_size = frame.size();
-        let layout = ProblemScreenLayout::from(term_size);
+        let layout = ProblemMenuLayout::from(term_size);
         let problem = ui::FullProblem::setup(&self.view);
         problem.render(frame, &layout);
     }

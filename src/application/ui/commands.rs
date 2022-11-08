@@ -1,5 +1,5 @@
 use crate::application::common::*;
-use crate::application::ui::ProblemScreenLayout;
+use crate::application::ui::ProblemMenuLayout;
 use crate::application::ui::UIElement;
 use crate::application::View;
 use tui::widgets::Paragraph;
@@ -17,7 +17,7 @@ pub struct CommandsView {
 }
 
 impl UIElement for CommandsView {
-    type ExpectedLayout = ProblemScreenLayout;
+    type ExpectedLayout = ProblemMenuLayout;
 
     fn setup(view: &View) -> Self {
         let compile_command = view.compile_command_view();
@@ -30,7 +30,7 @@ impl UIElement for CommandsView {
         }
     }
 
-    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemMenuLayout) {
         let bold_style = Style::default().add_modifier(Modifier::BOLD);
 
         let (compile_style, run_style) = match &self.selected {
@@ -50,6 +50,6 @@ impl UIElement for CommandsView {
             )),
         ]);
 
-        frame.render_widget(commands, layout.data);
+        frame.render_widget(commands, layout.problem_tabs);
     }
 }

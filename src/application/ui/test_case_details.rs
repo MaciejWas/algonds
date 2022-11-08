@@ -1,5 +1,5 @@
 use crate::application::common::*;
-use crate::application::ui::ProblemScreenLayout;
+use crate::application::ui::ProblemMenuLayout;
 use crate::application::ui::UIElement;
 use crate::application::View;
 use tui::widgets::Paragraph;
@@ -32,7 +32,7 @@ pub struct TestCaseDetails {
 }
 
 impl UIElement for TestCaseDetails {
-    type ExpectedLayout = ProblemScreenLayout;
+    type ExpectedLayout = ProblemMenuLayout;
 
     fn setup(view: &View) -> Self {
         let (id, test_case) = view.details_for_selected_test_case();
@@ -44,7 +44,7 @@ impl UIElement for TestCaseDetails {
         }
     }
 
-    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemScreenLayout) {
+    fn render<B: Backend>(self, frame: &mut Frame<B>, layout: &ProblemMenuLayout) {
         let mut lines = vec![
             Spans::from(format!("View of test case {} / {}:", self.id, self.total)),
             Spans::from(""),
@@ -53,10 +53,10 @@ impl UIElement for TestCaseDetails {
         lines.append(&mut details);
 
         let widget = Paragraph::new(lines);
-        frame.render_widget(widget, layout.data);
+        frame.render_widget(widget, layout.problem_tabs);
         frame.render_widget(
             Paragraph::new(pretty_bar(self.id, self.total)).alignment(Alignment::Right),
-            layout.data,
+            layout.problem_tabs,
         );
     }
 }
